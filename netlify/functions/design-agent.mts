@@ -2,61 +2,75 @@ import type { Config } from "@netlify/functions";
 import { callAgentJSON, jsonResponse, errorResponse } from "./_lib/claude.mts";
 
 /**
- * Agente 3 · Diseñador de solución de IA
- * Entrada: la oportunidad top priorizada.
- * Salida: el diseño concreto de la herramienta/agente de IA que la
- * resolvería: arquitectura, plataforma sugerida, prompt inicial ya
- * optimizado, y riesgos a mitigar.
- * Cubre: "Guiar a los ingenieros en el desarrollo de herramientas de IA,
- * agentes y chatbots" e "ingeniería de prompts y optimización de tokens".
+ * Agent 3 · AI Solution Designer
+ * Takes the top-priority opportunity and designs the actual intervention:
+ * what kind of AI approach fits (never defaulting to "AI Agent" for
+ * everything), who does what (AI vs. human), where it plugs into the
+ * existing workflow, and how success is measured.
  */
 
-interface DisenoAgente {
-  nombre_solucion: string;
-  tipo_solucion: "agente_ia" | "chatbot" | "automatizacion_script" | "prompt_reutilizable";
-  plataforma_sugerida: string;
-  arquitectura: string;
-  prompt_inicial_optimizado: string;
-  riesgos_y_mitigacion: string[];
-  metrica_de_exito: string;
+interface Blueprint {
+  problem: string;
+  recommended_approach:
+    | "Prompt workflow"
+    | "AI Agent"
+    | "Chatbot"
+    | "Knowledge retrieval"
+    | "Report automation"
+    | "Testing assistant"
+    | "Document generation"
+    | "Data analysis";
+  inputs: string[];
+  ai_role: string;
+  human_role: string;
+  output: string;
+  integration_point: string;
+  success_metrics: string[];
+  risks: string[];
+  implementation_steps: string[];
 }
 
 export default async (req: Request) => {
   if (req.method !== "POST") {
-    return jsonResponse({ error: "Usa POST" }, 405);
+    return jsonResponse({ error: "Use POST" }, 405);
   }
 
   try {
-    const { oportunidad } = (await req.json()) as { oportunidad?: unknown };
-    if (!oportunidad) {
-      return jsonResponse({ error: "Se requiere una oportunidad." }, 400);
+    const { opportunity } = (await req.json()) as { opportunity?: unknown };
+    if (!opportunity) {
+      return jsonResponse({ error: "An opportunity is required." }, 400);
     }
 
-    const diseno = await callAgentJSON<DisenoAgente>({
-      system: `Eres un especialista en implementación de IA que diseña, para
-ingenieros sin experiencia previa en LLMs, la solución concreta que resuelve
-una oportunidad de automatización. Debes proponer una plataforma realista
-(Mistral, Copilot, Glean, o un script simple si no amerita un LLM), una
-arquitectura breve y explicable, y un prompt inicial ya escrito con buenas
-prácticas de prompt engineering (rol, formato de salida, restricciones de
-longitud) listo para copiar y usar.`,
-      user: `Oportunidad priorizada a resolver (JSON):
-${JSON.stringify(oportunidad)}
+    const blueprint = await callAgentJSON<Blueprint>({
+      system: `You are an AI Implementation Specialist designing the concrete
+solution for a single prioritized opportunity, for a Project Leader with no
+prior LLM experience to review and approve. Match the recommended_approach
+to the actual problem — do not default to "AI Agent" unless the task truly
+requires multi-step autonomous decisions. A simple repetitive task is a
+"Prompt workflow" or "Report automation"; a lookup problem is "Knowledge
+retrieval"; a Q&A need is a "Chatbot"; a data question is "Data analysis".
+Always keep a human_role that includes reviewing or approving the output —
+never propose removing human oversight entirely.`,
+      user: `Prioritized opportunity to solve (JSON):
+${JSON.stringify(opportunity)}
 
-Devuelve un único objeto JSON con esta forma exacta:
+Return a single JSON object with this exact shape:
 {
-  "nombre_solucion": string,
-  "tipo_solucion": "agente_ia"|"chatbot"|"automatizacion_script"|"prompt_reutilizable",
-  "plataforma_sugerida": string,
-  "arquitectura": string (máx 60 palabras, explicando los componentes),
-  "prompt_inicial_optimizado": string (el prompt completo, listo para usar, con rol/formato/restricciones),
-  "riesgos_y_mitigacion": string[] (2-3 items, cada uno "riesgo: mitigación"),
-  "metrica_de_exito": string (una métrica concreta y medible)
+  "problem": string (<=30 words, restated concretely),
+  "recommended_approach": "Prompt workflow"|"AI Agent"|"Chatbot"|"Knowledge retrieval"|"Report automation"|"Testing assistant"|"Document generation"|"Data analysis",
+  "inputs": string[] (2-3 items: what data/documents/systems feed this),
+  "ai_role": string (<=25 words: exactly what the AI does),
+  "human_role": string (<=25 words: what stays human, including review/approval),
+  "output": string (<=20 words: the concrete artifact produced),
+  "integration_point": string (<=20 words: where in the existing workflow/tooling this plugs in, e.g. Jira, Confluence, Teams),
+  "success_metrics": string[] (2-3 items, qualitative or structural, not invented numbers),
+  "risks": string[] (2-3 items, each as "risk: mitigation"),
+  "implementation_steps": string[] (3-5 concrete, sequential steps)
 }`,
       maxTokens: 1500,
     });
 
-    return jsonResponse({ diseno });
+    return jsonResponse({ blueprint });
   } catch (err) {
     return errorResponse(err);
   }

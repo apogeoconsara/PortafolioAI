@@ -2,59 +2,69 @@ import type { Config } from "@netlify/functions";
 import { callAgentJSON, jsonResponse, errorResponse } from "./_lib/claude.mts";
 
 /**
- * Agente 2 · Priorizador
- * Entrada: oportunidades detectadas por el Agente Auditor.
- * Salida: las mismas oportunidades con score de impacto/esfuerzo y
- * cuadrante de la matriz de priorización, ordenadas de mayor a menor
- * prioridad.
- * Cubre: priorizar antes de "guiar a los ingenieros" y "apoyar la
- * implementación" — no toda oportunidad detectada merece el mismo esfuerzo.
+ * Agent 2 · Prioritizer
+ * Turns the Auditor's opportunities into a prioritization matrix using
+ * implementation judgment (impact, effort, frequency, risk), the way a
+ * real AI Implementation Specialist would in a project retro — not by
+ * inventing ROI, hours saved, or cost figures the user never provided.
  */
 
-interface OportunidadPriorizada {
-  tarea: string;
-  tipo: string;
-  horas_estimadas_mes: number;
-  justificacion: string;
-  impacto: 1 | 2 | 3 | 4 | 5;
-  esfuerzo: 1 | 2 | 3 | 4 | 5;
-  cuadrante: "quick_win" | "proyecto_mayor" | "relleno" | "baja_prioridad";
-  score_prioridad: number;
+interface MatrixRow {
+  opportunity: string;
+  business_impact: "low" | "medium" | "high";
+  implementation_effort: "low" | "medium" | "high";
+  frequency: string;
+  risk: "low" | "medium" | "high";
+  recommended_priority: "quick_win" | "strategic" | "experiment" | "low_priority";
+  note: string;
 }
 
 export default async (req: Request) => {
   if (req.method !== "POST") {
-    return jsonResponse({ error: "Usa POST" }, 405);
+    return jsonResponse({ error: "Use POST" }, 405);
   }
 
   try {
-    const { oportunidades } = (await req.json()) as { oportunidades?: unknown };
-    if (!Array.isArray(oportunidades) || oportunidades.length === 0) {
-      return jsonResponse({ error: "Se requiere un array de oportunidades." }, 400);
+    const { opportunities } = (await req.json()) as { opportunities?: unknown };
+    if (!Array.isArray(opportunities) || opportunities.length === 0) {
+      return jsonResponse({ error: "An array of opportunities is required." }, 400);
     }
 
-    const priorizadas = await callAgentJSON<OportunidadPriorizada[]>({
-      system: `Eres un especialista en priorización de iniciativas de IA para
-ingeniería. Recibes una lista de oportunidades de automatización y debes
-calificar cada una en impacto (1-5, basado en horas ahorradas y alineación con
-demandas de cliente) y esfuerzo de implementación (1-5, basado en qué tan
-compleja es de construir con las herramientas típicas: Mistral, Copilot, Glean).
-Clasifica cada una en un cuadrante:
-- "quick_win": impacto alto (4-5), esfuerzo bajo (1-2)
-- "proyecto_mayor": impacto alto (4-5), esfuerzo alto (4-5)
-- "relleno": impacto bajo (1-3), esfuerzo bajo (1-2)
-- "baja_prioridad": impacto bajo (1-3), esfuerzo alto (4-5)
-score_prioridad = impacto * 2 - esfuerzo (puede ser negativo).`,
-      user: `Oportunidades detectadas (JSON):
-${JSON.stringify(oportunidades)}
+    const matrix = await callAgentJSON<MatrixRow[]>({
+      system: `You are prioritizing AI implementation opportunities with the
+judgment of a real AI Implementation Specialist, not with hype. You do NOT
+have access to the project's actual metrics, so you must NEVER invent
+numeric ROI, hours saved, or cost figures. Score qualitatively (low/medium/
+high) based only on what is reasonable to infer from the description of
+each opportunity. Classify each into a quadrant:
+- "quick_win": high business_impact, low implementation_effort
+- "strategic": high business_impact, high implementation_effort
+- "experiment": low/medium business_impact, low implementation_effort
+- "low_priority": low business_impact, high implementation_effort
+Skip any opportunity whose recommended_intervention is "keep_human" — it
+does not belong in an implementation matrix.`,
+      user: `Opportunities detected by the Audit agent (JSON):
+${JSON.stringify(opportunities)}
 
-Devuelve el mismo array pero con los campos adicionales "impacto", "esfuerzo",
-"cuadrante" y "score_prioridad" en cada objeto, ordenado de mayor a menor
-score_prioridad.`,
+Return a JSON array (not an object) with one row per opportunity kept, in
+this exact shape, ordered with the highest-priority quick wins first:
+[{
+  "opportunity": string (same text as input),
+  "business_impact": "low"|"medium"|"high",
+  "implementation_effort": "low"|"medium"|"high",
+  "frequency": string (qualitative — infer from the text if stated, e.g. "weekly", "every sprint"; otherwise "not specified in the description"),
+  "risk": "low"|"medium"|"high",
+  "recommended_priority": "quick_win"|"strategic"|"experiment"|"low_priority",
+  "note": string (<=20 words, the reasoning, not a number)
+}]`,
       maxTokens: 1500,
     });
 
-    return jsonResponse({ priorizadas });
+    return jsonResponse({
+      matrix,
+      data_note:
+        "Impact, effort and risk are qualitative judgments based on the description provided. Quantified ROI or hours-saved estimates require the project's actual baseline data.",
+    });
   } catch (err) {
     return errorResponse(err);
   }

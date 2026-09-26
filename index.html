@@ -1,204 +1,256 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sarah Cruz Salazar · Especialista de Implementación de IA</title>
-<meta name="description" content="Portafolio de proyectos de implementación de IA, agentes, prompt engineering y automatización de flujos de ingeniería.">
+<title>Sarahí Cruz Salazar · AI Implementation Console</title>
+<meta name="description" content="AI Implementation Console: audit an engineering workflow, prioritize the opportunity, design the AI solution and get an implementation brief — live, powered by Claude.">
 <link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="assets/css/console.css">
 </head>
 <body>
 
 <header class="nav">
   <div class="container nav-inner">
-    <span class="logo">Sarah Cruz Salazar</span>
+    <span class="logo">Sarahí Cruz Salazar</span>
     <nav>
-      <a href="#perfil">Perfil</a>
-      <a href="#habilidades">Habilidades</a>
-      <a href="#proyectos">Proyectos</a>
-      <a href="#metodologia">Metodología</a>
-      <a href="#contacto">Contacto</a>
+      <a href="#console">Console</a>
+      <a href="#methodology">Methodology</a>
+      <a href="#map">Implementation Map</a>
+      <a href="#work">Selected Work</a>
+      <a href="#contact">Contact</a>
     </nav>
   </div>
 </header>
 
-<section class="hero">
+<!-- ============ 1 & 2. HERO + LIVE CONSOLE ============ -->
+<section id="console" class="console-hero">
   <div class="container">
-    <p class="eyebrow">Portafolio técnico · AI Implementation Specialist</p>
-    <h1>Impulso la adopción de IA en equipos de ingeniería:<br>auditoría, agentes, prompts y automatización.</h1>
-    <p class="lead">
-      Este portafolio está construido específicamente para la vacante de
-      <strong>Especialista de Implementación de IA en Alten México</strong>. Cada proyecto responde a una
-      actividad del puesto: auditoría de procesos, desarrollo de agentes de IA, ingeniería de prompts y
-      optimización de tokens, dashboards de adopción, y capacitación/gestión del cambio.
-    </p>
-    <div class="cta-row">
-      <a class="btn btn-primary" href="motor-ia.html">Probar el Motor de Adopción de IA (en vivo)</a>
-      <a class="btn btn-outline" href="#proyectos">Ver proyectos</a>
+    <p class="role-line">AI Implementation &amp; Automation</p>
+    <h1>From engineering workflow to AI implementation.</h1>
+    <p class="lead">Audit the process. Identify the opportunity. Design the AI solution. Measure adoption.</p>
+    <p class="tags-line">Applied AI · AI Agents · Workflow Automation · Prompt Engineering · Analytics · AI Adoption</p>
+  </div>
+
+  <div class="container">
+    <div class="console-app">
+
+      <div class="console-input">
+        <label for="workflow-input" class="field-label">Describe an engineering workflow</label>
+        <textarea id="workflow-input" rows="4" placeholder="Each week, engineers manually consolidate testing results from multiple files, summarize failures and create a status report for the Project Leader."></textarea>
+        <div class="cta-row">
+          <button id="btn-run" class="btn btn-primary" type="button">Analyze workflow</button>
+          <button id="btn-example" class="btn btn-outline" type="button">Try an engineering example</button>
+        </div>
+        <p id="error-msg" class="error-msg" hidden></p>
+      </div>
+
+      <div class="pipeline" id="pipeline">
+        <div class="pipeline-stage" data-stage="audit">
+          <span class="pipeline-num">01</span>
+          <span class="pipeline-name">AUDIT</span>
+          <span class="pipeline-desc">Process understanding</span>
+        </div>
+        <div class="pipeline-arrow">→</div>
+        <div class="pipeline-stage" data-stage="prioritize">
+          <span class="pipeline-num">02</span>
+          <span class="pipeline-name">PRIORITIZE</span>
+          <span class="pipeline-desc">Impact × effort</span>
+        </div>
+        <div class="pipeline-arrow">→</div>
+        <div class="pipeline-stage" data-stage="design">
+          <span class="pipeline-num">03</span>
+          <span class="pipeline-name">DESIGN</span>
+          <span class="pipeline-desc">AI solution architecture</span>
+        </div>
+        <div class="pipeline-arrow">→</div>
+        <div class="pipeline-stage" data-stage="report">
+          <span class="pipeline-num">04</span>
+          <span class="pipeline-name">DELIVER</span>
+          <span class="pipeline-desc">Implementation brief</span>
+        </div>
+      </div>
+
+      <div class="console-log" id="console-log" aria-live="polite"></div>
+
+      <!-- ===== 3. AUDIT RESULT ===== -->
+      <div class="result-panel" id="panel-audit" hidden>
+        <h3>Workflow Audit</h3>
+        <p class="panel-lede" data-field="current_process"></p>
+        <div class="audit-grid">
+          <div><h4>Bottlenecks</h4><ul data-field="bottlenecks"></ul></div>
+          <div><h4>Repetitive work</h4><ul data-field="repetitive_work"></ul></div>
+          <div><h4>Information dependencies</h4><ul data-field="information_dependencies"></ul></div>
+          <div><h4>Human decision points</h4><ul data-field="human_decision_points"></ul></div>
+          <div><h4>Potential risks</h4><ul data-field="potential_risks"></ul></div>
+        </div>
+        <h4 class="opportunities-title">Automation opportunities</h4>
+        <div class="opportunity-list" data-field="opportunities"></div>
+      </div>
+
+      <!-- ===== 4. PRIORITIZATION ===== -->
+      <div class="result-panel" id="panel-prioritize" hidden>
+        <h3>Opportunity Prioritization</h3>
+        <p class="data-note" data-field="data_note"></p>
+        <div class="quadrant" id="quadrant">
+          <div class="quadrant-cell" data-quadrant="quick_win"><span class="quadrant-label">Quick win</span><div class="quadrant-items"></div></div>
+          <div class="quadrant-cell" data-quadrant="strategic"><span class="quadrant-label">Strategic</span><div class="quadrant-items"></div></div>
+          <div class="quadrant-cell" data-quadrant="experiment"><span class="quadrant-label">Experiment</span><div class="quadrant-items"></div></div>
+          <div class="quadrant-cell" data-quadrant="low_priority"><span class="quadrant-label">Low priority</span><div class="quadrant-items"></div></div>
+        </div>
+        <div class="table-wrap">
+          <table id="matrix-table">
+            <thead><tr><th>Opportunity</th><th>Business impact</th><th>Implementation effort</th><th>Frequency</th><th>Risk</th><th>Priority</th></tr></thead>
+            <tbody data-field="matrix-rows"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ===== 5. AI SOLUTION BLUEPRINT ===== -->
+      <div class="result-panel" id="panel-design" hidden>
+        <h3>AI Solution Blueprint</h3>
+        <p class="panel-lede" data-field="problem"></p>
+        <span class="approach-badge" data-field="recommended_approach"></span>
+
+        <div class="blueprint-diagram">
+          <div class="diagram-node">Engineering Workflow</div>
+          <div class="diagram-arrow">↓</div>
+          <div class="diagram-node">Input / Data</div>
+          <div class="diagram-arrow">↓</div>
+          <div class="diagram-node diagram-node-ai">AI Layer</div>
+          <div class="diagram-arrow">↓</div>
+          <div class="diagram-node">Validation / Human-in-the-loop</div>
+          <div class="diagram-arrow">↓</div>
+          <div class="diagram-node">Engineering Output</div>
+          <div class="diagram-arrow">↓</div>
+          <div class="diagram-node">Metrics</div>
+        </div>
+
+        <div class="blueprint-grid">
+          <div><h4>Inputs</h4><ul data-field="inputs"></ul></div>
+          <div><h4>AI role</h4><p data-field="ai_role"></p></div>
+          <div><h4>Human role</h4><p data-field="human_role"></p></div>
+          <div><h4>Output</h4><p data-field="output"></p></div>
+          <div><h4>Integration point</h4><p data-field="integration_point"></p></div>
+          <div><h4>Success metrics</h4><ul data-field="success_metrics"></ul></div>
+          <div><h4>Risks</h4><ul data-field="risks"></ul></div>
+          <div><h4>Implementation steps</h4><ol data-field="implementation_steps"></ol></div>
+        </div>
+      </div>
+
+      <!-- ===== 6. IMPLEMENTATION BRIEF ===== -->
+      <div class="result-panel" id="panel-report" hidden>
+        <div class="brief-header">
+          <h3>Implementation Brief</h3>
+          <button id="btn-download" class="btn btn-outline btn-sm" type="button">Export implementation brief</button>
+        </div>
+        <div class="brief-tabs" id="brief-tabs">
+          <button class="tab-btn active" data-brief-tab="executive_summary" type="button">Executive Summary</button>
+          <button class="tab-btn" data-brief-tab="technical_approach" type="button">Technical Approach</button>
+          <button class="tab-btn" data-brief-tab="adoption_plan" type="button">Adoption Plan</button>
+          <button class="tab-btn" data-brief-tab="metrics" type="button">Metrics</button>
+          <button class="tab-btn" data-brief-tab="documentation" type="button">Documentation</button>
+        </div>
+        <div class="brief-panels">
+          <p class="brief-panel active" data-brief-panel="executive_summary"></p>
+          <p class="brief-panel" data-brief-panel="technical_approach"></p>
+          <p class="brief-panel" data-brief-panel="adoption_plan"></p>
+          <p class="brief-panel" data-brief-panel="metrics"></p>
+          <p class="brief-panel" data-brief-panel="documentation"></p>
+        </div>
+      </div>
+
     </div>
   </div>
 </section>
 
-<section id="perfil" class="section">
+<!-- ============ 7. METHODOLOGY ============ -->
+<section id="methodology" class="section">
   <div class="container">
-    <h2>Perfil</h2>
-    <p>
-      Profesional técnico enfocado en llevar la Inteligencia Artificial de la teoría a la práctica dentro de
-      equipos de ingeniería: identifico procesos manuales de pruebas, reportes y diseño, y los transformo en
-      flujos asistidos por LLMs (Mistral, Copilot, Glean) y agentes de IA, midiendo siempre el impacto en tiempo
-      y calidad. Trabajo de la mano con Líderes de Proyecto para que la adopción sea sostenible: documentación,
-      capacitación y gobierno de las herramientas.
-    </p>
-  </div>
-</section>
-
-<section id="habilidades" class="section alt">
-  <div class="container">
-    <h2>Habilidades clave</h2>
-    <div class="grid-3">
-      <div class="card">
-        <h3>LLMs &amp; Agentes de IA</h3>
-        <p>Prompt engineering, optimización de tokens, RAG básico, diseño de agentes y chatbots con Mistral, Copilot y Glean.</p>
-      </div>
-      <div class="card">
-        <h3>Automatización de flujos</h3>
-        <p>Auditoría de procesos de pruebas, reportes y diseño; scripts de automatización y orquestación de tareas repetitivas.</p>
-      </div>
-      <div class="card">
-        <h3>Gestión de proyectos</h3>
-        <p>Jira, Confluence, NetSuite: documentación de procesos, seguimiento de iniciativas y reporte a stakeholders.</p>
-      </div>
-      <div class="card">
-        <h3>Análisis de datos</h3>
-        <p>Power BI, Excel y SQL para medir adopción de IA, ahorro de tiempo y ROI de las iniciativas.</p>
-      </div>
-      <div class="card">
-        <h3>Capacitación &amp; change management</h3>
-        <p>Diseño de talleres, guías internas y cultura de adopción autónoma de IA para ingenieros.</p>
-      </div>
-      <div class="card">
-        <h3>Inglés técnico</h3>
-        <p>Documentación, comunicación y coordinación con equipos globales en inglés intermedio-avanzado.</p>
-      </div>
+    <p class="section-kicker">AI implementation is not just building a model.</p>
+    <div class="method-grid">
+      <div class="method-step"><span class="method-num">01</span><h3>Audit</h3><p>Understand how the engineering team works today.</p></div>
+      <div class="method-step"><span class="method-num">02</span><h3>Prioritize</h3><p>Find where AI creates meaningful operational value.</p></div>
+      <div class="method-step"><span class="method-num">03</span><h3>Build</h3><p>Prototype the right intervention: prompt, automation, agent or assistant.</p></div>
+      <div class="method-step"><span class="method-num">04</span><h3>Integrate</h3><p>Connect the solution to the existing workflow.</p></div>
+      <div class="method-step"><span class="method-num">05</span><h3>Measure</h3><p>Track adoption, quality and operational impact.</p></div>
+      <div class="method-step"><span class="method-num">06</span><h3>Enable</h3><p>Document and train the team to operate independently.</p></div>
+      <div class="method-step"><span class="method-num">07</span><h3>Re-audit</h3><p>Find the next opportunity as the project evolves.</p></div>
     </div>
   </div>
 </section>
 
-<section id="proyectos" class="section">
+<!-- ============ 8. AI IMPLEMENTATION MAP ============ -->
+<section id="map" class="section alt">
   <div class="container">
-    <h2>Proyectos demostrativos</h2>
-    <p class="section-intro">
-      Cada proyecto vive en <code>/projects</code> con código y documentación reales, listos para revisar.
-    </p>
-
-    <article class="project featured">
-      <div class="project-text">
-        <span class="tag">Motor en vivo · Claude API</span>
-        <h3>00 · Motor de Adopción de IA — pipeline de 4 agentes encadenados</h3>
-        <p>
-          No es una maqueta: es una aplicación funcional (Netlify Functions + Claude) donde describes un
-          proceso real de ingeniería y 4 agentes se ejecutan en cadena —
-          <strong>Auditor → Priorizador → Diseñador de solución → Reportero</strong>— cada uno alimentando
-          al siguiente con datos reales, hasta entregar un reporte descargable listo para Confluence.
-        </p>
-        <a class="link" href="motor-ia.html">Ejecutar el motor →</a>
-      </div>
-    </article>
-
-    <article class="project">
-      <div class="project-text">
-        <span class="tag">Auditoría · Automatización</span>
-        <h3>01 · Auditoría de flujo de pruebas y detección de automatización con IA</h3>
-        <p>
-          Framework de auditoría (checklist + script en Python) para escanear un proyecto de ingeniería,
-          identificar tareas repetitivas de pruebas/reportes y calcular el ahorro estimado de horas al
-          automatizarlas con IA. Incluye una plantilla de hallazgos lista para Confluence/Jira.
-        </p>
-        <a class="link" href="projects/01-auditoria-automatizacion-flujos/README.md">Ver proyecto →</a>
-      </div>
-    </article>
-
-    <article class="project">
-      <div class="project-text">
-        <span class="tag">Agentes de IA · Soporte</span>
-        <h3>02 · Agente de soporte técnico con enrutamiento y base de conocimiento</h3>
-        <p>
-          Prototipo funcional en Python de un agente de soporte para ingeniería (tipo chatbot interno) que
-          clasifica tickets, consulta una base de conocimiento local y escala a un humano cuando no tiene
-          confianza suficiente. Pensado como punto de partida para integrarse con Mistral/Copilot/Glean.
-        </p>
-        <a class="link" href="projects/02-agente-ia-soporte-tecnico/README.md">Ver proyecto →</a>
-      </div>
-    </article>
-
-    <article class="project">
-      <div class="project-text">
-        <span class="tag">Prompt Engineering · Tokens</span>
-        <h3>03 · Biblioteca de prompts y optimizador de tokens</h3>
-        <p>
-          Catálogo de prompts reutilizables para tareas de ingeniería (generación de casos de prueba, resumen
-          de reportes, revisión de diseño) con versiones "antes/después" y un script que estima el ahorro de
-          tokens y costo al optimizar cada prompt.
-        </p>
-        <a class="link" href="projects/03-prompt-engineering-tokens/README.md">Ver proyecto →</a>
-      </div>
-    </article>
-
-    <article class="project">
-      <div class="project-text">
-        <span class="tag">Power BI · SQL · Excel</span>
-        <h3>04 · Dashboard de adopción de IA</h3>
-        <p>
-          Modelo de datos y consultas SQL para medir adopción de IA por equipo: horas ahorradas, número de
-          automatizaciones activas y tickets resueltos por el agente. Incluye especificación lista para
-          construir el dashboard en Power BI.
-        </p>
-        <a class="link" href="projects/04-dashboard-adopcion-ia/README.md">Ver proyecto →</a>
-      </div>
-    </article>
-
-    <article class="project">
-      <div class="project-text">
-        <span class="tag">Capacitación · Change Management</span>
-        <h3>05 · Programa de capacitación y guías de adopción de IA</h3>
-        <p>
-          Plan de capacitación en 4 sesiones para ingenieros (fundamentos de LLMs, prompt engineering,
-          construcción de su primer agente, buenas prácticas) más una plantilla de guía interna estilo
-          Confluence/SharePoint.
-        </p>
-        <a class="link" href="projects/05-capacitacion-gestion-cambio/README.md">Ver proyecto →</a>
-      </div>
-    </article>
+    <h2>Where AI can enter the engineering workflow</h2>
+    <div class="map-stages" id="map-stages">
+      <button class="map-stage" data-map="requirements" type="button">Requirements</button>
+      <span class="map-arrow">→</span>
+      <button class="map-stage" data-map="design" type="button">Design</button>
+      <span class="map-arrow">→</span>
+      <button class="map-stage" data-map="development" type="button">Development</button>
+      <span class="map-arrow">→</span>
+      <button class="map-stage active" data-map="testing" type="button">Testing</button>
+      <span class="map-arrow">→</span>
+      <button class="map-stage" data-map="reporting" type="button">Reporting</button>
+      <span class="map-arrow">→</span>
+      <button class="map-stage" data-map="knowledge" type="button">Knowledge</button>
+      <span class="map-arrow">→</span>
+      <button class="map-stage" data-map="pm" type="button">Project Management</button>
+    </div>
+    <div class="map-panel" id="map-panel">
+      <h3 id="map-panel-title">Testing</h3>
+      <ul id="map-panel-list"></ul>
+    </div>
   </div>
 </section>
 
-<section id="metodologia" class="section alt">
+<!-- ============ 9. SELECTED WORK ============ -->
+<section id="work" class="section">
   <div class="container">
-    <h2>Cómo trabajo la implementación de IA</h2>
-    <ol class="steps">
-      <li><strong>Auditar:</strong> mapear procesos de ingeniería y detectar cuellos de botella automatizables.</li>
-      <li><strong>Priorizar:</strong> estimar impacto (horas, calidad, satisfacción del cliente) y esfuerzo.</li>
-      <li><strong>Prototipar:</strong> construir un agente, prompt o automatización mínima viable con el equipo.</li>
-      <li><strong>Medir:</strong> instrumentar con métricas simples (Power BI/Excel/SQL) el antes y después.</li>
-      <li><strong>Capacitar:</strong> transferir la herramienta al equipo con documentación y talleres.</li>
-      <li><strong>Reauditar:</strong> repetir el ciclo a medida que evolucionan los flujos del proyecto.</li>
-    </ol>
+    <h2>Selected AI &amp; Automation Work</h2>
+    <p class="section-intro">Three pieces of working code, not slideware — each one proof of a specific part of the methodology above.</p>
+
+    <div class="work-grid">
+      <article class="work-card">
+        <span class="tag">Audit → Prioritize</span>
+        <h3>Workflow Audit Framework</h3>
+        <p>A repeatable audit checklist plus a scoring script that turns a team's task inventory into a ranked automation backlog — the same logic behind the Audit/Prioritize agents above, runnable on real project data.</p>
+        <a class="link" href="https://github.com/apogeoconsara/PortafolioAI/tree/main/projects/01-auditoria-automatizacion-flujos" target="_blank" rel="noopener">View the code →</a>
+      </article>
+
+      <article class="work-card">
+        <span class="tag">AI Agent · Support</span>
+        <h3>Support Agent Prototype</h3>
+        <p>A working agent that classifies incoming questions, retrieves the answer from a knowledge base, and escalates to a human when confidence is low — the escalation-by-design pattern any internal AI agent needs.</p>
+        <a class="link" href="https://github.com/apogeoconsara/PortafolioAI/tree/main/projects/02-agente-ia-soporte-tecnico" target="_blank" rel="noopener">View the code →</a>
+      </article>
+
+      <article class="work-card">
+        <span class="tag">Analytics · Adoption</span>
+        <h3>Adoption Analytics Model</h3>
+        <p>A data model, SQL queries and a Power BI spec to answer the question every Technical Director asks after a pilot: is this actually saving time, and for which teams.</p>
+        <a class="link" href="https://github.com/apogeoconsara/PortafolioAI/tree/main/projects/04-dashboard-adopcion-ia" target="_blank" rel="noopener">View the code →</a>
+      </article>
+    </div>
   </div>
 </section>
 
-<section id="contacto" class="section">
+<section id="contact" class="section alt">
   <div class="container">
-    <h2>Contacto</h2>
-    <p>Disponible para conversar sobre la posición de Especialista de Implementación de IA en Alten México.</p>
+    <h2>Contact</h2>
+    <p>Available to discuss the AI Implementation Specialist role at Alten México.</p>
     <p class="contact-email">sarahicruzsalazar@gmail.com</p>
   </div>
 </section>
 
 <footer class="footer">
   <div class="container">
-    <p>© 2026 Sarah Cruz Salazar · Portafolio construido para la vacante de Alten México</p>
+    <p>© 2026 Sarahí Cruz Salazar · Console built with Netlify Functions + Claude (Anthropic)</p>
   </div>
 </footer>
 
+<script src="assets/js/console.js"></script>
 </body>
 </html>

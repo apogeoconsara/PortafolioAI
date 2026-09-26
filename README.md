@@ -1,54 +1,48 @@
-# Portafolio · Especialista de Implementación de IA (Alten México)
+# AI Implementation Console — Sarahí Cruz Salazar
 
-Portafolio construido específicamente para la vacante de **Especialista de Implementación de IA** en
-**Alten México**. No es un sitio estático: incluye un **motor funcional de 4 agentes de IA encadenados**
-(`motor-ia.html` + Netlify Functions llamando a Claude en vivo), más 5 proyectos de código/documentación
-adicionales, cada uno mapeado a una actividad concreta de la descripción del puesto.
+Built for the **AI Implementation Specialist** role at **Alten México**. This is not a static resume site: the
+homepage IS a working 4-agent AI implementation pipeline (Netlify Functions calling Claude live), followed by
+the methodology, an interactive map of where AI fits an engineering workflow, and proof-of-execution code.
 
-## El motor de adopción de IA (`motor-ia.html`)
+## The console (`index.html`)
 
-Pipeline real, no simulado: **Auditor → Priorizador → Diseñador de solución → Reportero**. El usuario
-describe un proceso de ingeniería; cada agente es una Netlify Function (`netlify/functions/*.mts`) que llama
-a la API de Claude y pasa su salida estructurada (JSON) al siguiente agente, hasta producir un reporte en
-markdown descargable. Desplegado en `https://sarahiportafolioalten.netlify.app` (rama de esta sesión en
-`https://claude-kind-euler-4jv3it--sarahiportafolioalten.netlify.app`).
+Describe a real engineering workflow and watch four chained agents run against it:
 
-Requiere la variable de entorno `ANTHROPIC_API_KEY` configurada en Netlify (ya está configurada en este
-proyecto). Estructura de las funciones:
+**Audit → Prioritize → Design → Deliver**
 
-```
-netlify/functions/
-  _lib/claude.mts       Cliente de Anthropic + helpers para respuestas JSON/texto
-  audit.mts             Agente 1: detecta oportunidades de automatización
-  prioritize.mts        Agente 2: puntúa impacto/esfuerzo y prioriza
-  design-agent.mts      Agente 3: diseña la solución (plataforma, arquitectura, prompt)
-  report.mts            Agente 4: redacta el reporte final en markdown
-```
+| Agent | Function | What it produces |
+|---|---|---|
+| Audit | `netlify/functions/audit.mts` | Current process, bottlenecks, repetitive work, dependencies, human decision points, risks, and scored automation opportunities |
+| Prioritize | `netlify/functions/prioritize.mts` | An impact × effort matrix (quick win / strategic / experiment / low priority) — never invents ROI or hours saved without baseline data |
+| Design | `netlify/functions/design-agent.mts` | An AI Solution Blueprint: approach, AI role vs. human role, integration point, success metrics, risks, implementation steps |
+| Deliver | `netlify/functions/report.mts` | An Implementation Brief (Executive Summary / Technical Approach / Adoption Plan / Metrics / Documentation), exportable as Markdown |
 
-## Ver el sitio
+Each agent's structured JSON output feeds the next — this is a real chained pipeline, not four independent
+prompts. Deployed at `https://sarahiportafolioalten.netlify.app`. Requires `ANTHROPIC_API_KEY` set in Netlify
+(already configured for this project).
 
-Abre `index.html` en el navegador para la landing, y `motor-ia.html` para el motor en vivo (el motor solo
-funciona desplegado en Netlify, porque necesita las funciones serverless).
+`motor-ia.html` is kept only as a redirect to `index.html#console` for the old link.
 
-## Estructura
+## Structure
 
 ```
-index.html                          Sitio del portafolio
-motor-ia.html                       Motor de adopción de IA (pipeline de agentes)
-netlify/functions/                  Los 4 agentes del pipeline (Netlify Functions + Claude)
-assets/                             CSS/JS del sitio y del motor
+index.html                          The AI Implementation Console (homepage)
+netlify/functions/                  The 4 chained agents (Netlify Functions + Claude)
+  _lib/claude.mts                     Anthropic client + JSON/text response helpers
+assets/css/console.css              Console UI: pipeline, results panels, map, methodology
+assets/js/console.js                Pipeline orchestration + AI Implementation Map data
 projects/
-  01-auditoria-automatizacion-flujos/     Auditoría de procesos + script de priorización
-  02-agente-ia-soporte-tecnico/           Agente de soporte con enrutamiento y escalamiento
-  03-prompt-engineering-tokens/           Biblioteca de prompts + optimizador de tokens
-  04-dashboard-adopcion-ia/               Modelo de datos, SQL y especificación de dashboard Power BI
-  05-capacitacion-gestion-cambio/         Plan de capacitación + plantilla de documentación interna
+  01-auditoria-automatizacion-flujos/     Audit checklist + opportunity-scoring script
+  02-agente-ia-soporte-tecnico/           Support agent: classify → retrieve → escalate
+  03-prompt-engineering-tokens/           Prompt library + token optimizer
+  04-dashboard-adopcion-ia/               Data model, SQL and Power BI spec for adoption metrics
+  05-capacitacion-gestion-cambio/         Training plan + internal documentation template
 ```
 
-Cada carpeta de `projects/` tiene su propio `README.md` con el problema que resuelve, cómo ejecutarlo y qué
-actividad de la vacante demuestra. Todo el código (`.py`, `.sql`) fue ejecutado y verificado antes de
-publicarse.
+Each `projects/` folder has its own README with the problem it solves and how to run it. All code (`.py`,
+`.sql`) was executed and verified before publishing. The homepage's "Selected AI & Automation Work" section
+links directly to projects 01, 02 and 04 as proof of execution.
 
-## Contacto
+## Contact
 
 sarahicruzsalazar@gmail.com

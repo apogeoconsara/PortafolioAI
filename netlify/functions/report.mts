@@ -1,61 +1,75 @@
 import type { Config } from "@netlify/functions";
-import { callAgentText, jsonResponse, errorResponse } from "./_lib/claude.mts";
+import { callAgentJSON, jsonResponse, errorResponse } from "./_lib/claude.mts";
 
 /**
- * Agente 4 · Reportero
- * Entrada: proceso original, oportunidades priorizadas y diseño de la
- * solución top.
- * Salida: reporte en markdown listo para pegar en Confluence, dirigido a
- * un Líder de Proyecto o al director técnico.
- * Cubre: "Reportar el progreso al director técnico y a las partes
- * interesadas globales" y "Documentar procesos y crear guías... (Confluence)".
+ * Agent 4 · Implementation Brief
+ * Compiles the audit, prioritization and blueprint into a document a
+ * Project Leader could actually act on — structured into the same
+ * sections a real Confluence/SharePoint page for this would have.
  */
+
+interface Brief {
+  executive_summary: string;
+  technical_approach: string;
+  adoption_plan: string;
+  metrics: string;
+  documentation: string;
+}
 
 export default async (req: Request) => {
   if (req.method !== "POST") {
-    return jsonResponse({ error: "Usa POST" }, 405);
+    return jsonResponse({ error: "Use POST" }, 405);
   }
 
   try {
-    const { proceso, priorizadas, diseno } = (await req.json()) as {
-      proceso?: string;
-      priorizadas?: unknown;
-      diseno?: unknown;
+    const { process: workflow, audit, opportunity, blueprint } = (await req.json()) as {
+      process?: string;
+      audit?: unknown;
+      opportunity?: unknown;
+      blueprint?: unknown;
     };
-    if (!proceso || !priorizadas || !diseno) {
+    if (!workflow || !audit || !opportunity || !blueprint) {
       return jsonResponse(
-        { error: "Se requieren 'proceso', 'priorizadas' y 'diseno'." },
+        { error: "'process', 'audit', 'opportunity' and 'blueprint' are required." },
         400
       );
     }
 
-    const reporte = await callAgentText({
-      system: `Eres un Especialista de Implementación de IA redactando un reporte
-ejecutivo en español para un Líder de Proyecto, en formato markdown listo para
-pegar en Confluence. Sé concreto, usa tablas cuando ayuden, y no repitas
-información innecesariamente.`,
-      user: `Redacta el reporte con estas secciones fijas, en este orden:
-1. "## Resumen ejecutivo" (máx 60 palabras)
-2. "## Oportunidades detectadas y priorización" (tabla: Tarea, Tipo, Horas/mes, Cuadrante, Score)
-3. "## Solución propuesta para la oportunidad top" (nombre, plataforma, arquitectura, prompt inicial en bloque de código, riesgos, métrica de éxito)
-4. "## Próximos pasos" (3-4 viñetas concretas y accionables)
+    const brief = await callAgentJSON<Brief>({
+      system: `You are an AI Implementation Specialist writing an
+implementation brief for a Project Leader, in the tone of a document that
+will actually be pasted into Confluence or SharePoint. Be concrete and
+concise. Never invent numeric ROI or hours-saved figures that were not
+established earlier in the pipeline — if none were given, say metrics will
+be tracked from a baseline once implemented.`,
+      user: `Data to compile:
 
-Datos:
-
-Proceso auditado:
+Original workflow description:
 """
-${proceso}
+${workflow}
 """
 
-Oportunidades priorizadas (JSON):
-${JSON.stringify(priorizadas)}
+Audit findings (JSON):
+${JSON.stringify(audit)}
 
-Diseño de la solución propuesta (JSON):
-${JSON.stringify(diseno)}`,
-      maxTokens: 2000,
+Prioritized opportunity selected (JSON):
+${JSON.stringify(opportunity)}
+
+Solution blueprint (JSON):
+${JSON.stringify(blueprint)}
+
+Return a single JSON object with this exact shape:
+{
+  "executive_summary": string (<=70 words: what was audited and what is recommended),
+  "technical_approach": string (<=130 words: summarize the blueprint — approach, AI role, human role, integration point),
+  "adoption_plan": string (<=130 words: concrete steps to train the team and get this adopted — reference documentation, a pilot, and re-auditing later),
+  "metrics": string (<=80 words: how success will be tracked; state plainly that quantified targets require baseline data if none was given),
+  "documentation": string (<=100 words: what sections this should become in Confluence/SharePoint so another engineer could pick it up)
+}`,
+      maxTokens: 1800,
     });
 
-    return jsonResponse({ reporte });
+    return jsonResponse({ brief });
   } catch (err) {
     return errorResponse(err);
   }

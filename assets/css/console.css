@@ -1,0 +1,614 @@
+/* ============ HERO / CONSOLE ============ */
+
+.console-hero {
+  padding: 56px 0 64px;
+  background: linear-gradient(180deg, var(--accent-soft) 0%, var(--bg) 55%);
+  border-bottom: 1px solid var(--border);
+}
+
+.role-line {
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.78rem;
+  font-weight: 700;
+  margin: 0 0 12px;
+}
+
+.console-hero h1 {
+  font-size: clamp(1.8rem, 3.6vw, 2.6rem);
+  max-width: 780px;
+  margin: 0 0 14px;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+.console-hero .lead {
+  max-width: 680px;
+  color: var(--text-muted);
+  font-size: 1.05rem;
+  margin: 0 0 10px;
+}
+
+.tags-line {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin: 0 0 32px;
+}
+
+/* ---- App shell ---- */
+
+.console-app {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  padding: 24px;
+}
+
+.field-label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+#workflow-input {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  padding: 14px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  resize: vertical;
+}
+
+#workflow-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.error-msg {
+  color: #b42318;
+  background: #fef3f2;
+  border: 1px solid #fecdca;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-top: 12px;
+  font-size: 0.88rem;
+}
+
+/* ---- Pipeline ---- */
+
+.pipeline {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  margin-top: 28px;
+  flex-wrap: wrap;
+}
+
+.pipeline-stage {
+  flex: 1;
+  min-width: 130px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  background: var(--bg);
+  transition: border-color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+}
+
+.pipeline-num {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+}
+
+.pipeline-name {
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.pipeline-desc {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.pipeline-arrow {
+  display: flex;
+  align-items: center;
+  color: var(--border);
+  font-size: 1.1rem;
+}
+
+.pipeline-stage.active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.pipeline-stage.active .pipeline-num,
+.pipeline-stage.active .pipeline-name {
+  color: var(--accent);
+}
+
+.pipeline-stage.done {
+  border-color: #a6f4c5;
+  background: #f6fef9;
+}
+
+.pipeline-stage.done .pipeline-num {
+  color: var(--accent-2);
+}
+
+.pipeline-stage.error {
+  border-color: #fecdca;
+  background: #fef3f2;
+}
+
+/* ---- Live console log ---- */
+
+.console-log {
+  margin-top: 18px;
+  background: #0b1220;
+  color: #d1f7e0;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 0.78rem;
+  line-height: 1.6;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.console-log:empty {
+  display: none;
+}
+
+.console-line { white-space: pre-wrap; }
+.console-line .t { color: #7c8aa0; margin-right: 8px; }
+.console-line.ok { color: #7ee0c3; }
+.console-line.err { color: #ff9b8f; }
+
+/* ---- Result panels (shared) ---- */
+
+.result-panel {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+  animation: fadein 0.3s ease;
+}
+
+@keyframes fadein {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.result-panel h3 {
+  margin: 0 0 8px;
+  font-size: 1.15rem;
+  color: var(--text);
+}
+
+.result-panel h4 {
+  margin: 0 0 6px;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+}
+
+.panel-lede {
+  color: var(--text);
+  font-size: 0.95rem;
+  max-width: 720px;
+  margin-bottom: 16px;
+}
+
+.result-panel ul, .result-panel ol {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+}
+
+.result-panel li {
+  margin-bottom: 4px;
+}
+
+/* Audit grid */
+
+.audit-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 18px;
+  margin-bottom: 20px;
+}
+
+.opportunities-title {
+  margin-top: 4px;
+}
+
+.opportunity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.opportunity-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 14px;
+  background: var(--bg);
+}
+
+.opportunity-text {
+  flex: 1;
+  min-width: 200px;
+  font-size: 0.88rem;
+  color: var(--text);
+}
+
+.opportunity-rationale {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.badge {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 3px 11px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.badge-low { background: #f2f4f7; color: #475467; }
+.badge-medium { background: #fffaeb; color: #b54708; }
+.badge-high { background: #ecfdf3; color: #067647; }
+
+.badge-intervention {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+/* Prioritization */
+
+.data-note {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  background: var(--bg);
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin: 0 0 18px;
+  max-width: 640px;
+}
+
+.quadrant {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.quadrant-cell {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  min-height: 90px;
+  background: var(--bg);
+}
+
+.quadrant-cell[data-quadrant="quick_win"] { border-top: 3px solid #067647; }
+.quadrant-cell[data-quadrant="strategic"] { border-top: 3px solid var(--accent); }
+.quadrant-cell[data-quadrant="experiment"] { border-top: 3px solid #b54708; }
+.quadrant-cell[data-quadrant="low_priority"] { border-top: 3px solid #98a2b3; }
+
+.quadrant-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.quadrant-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.quadrant-chip {
+  font-size: 0.76rem;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 3px 10px;
+  color: var(--text);
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+#matrix-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.84rem;
+}
+
+#matrix-table th, #matrix-table td {
+  border: 1px solid var(--border);
+  padding: 8px 10px;
+  text-align: left;
+}
+
+#matrix-table th {
+  background: var(--bg);
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* Blueprint */
+
+.approach-badge {
+  display: inline-block;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 999px;
+  padding: 4px 14px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.blueprint-diagram {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  margin: 0 auto 24px;
+  max-width: 340px;
+}
+
+.diagram-node {
+  width: 100%;
+  text-align: center;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.82rem;
+  color: var(--text);
+}
+
+.diagram-node-ai {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.diagram-arrow {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.blueprint-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 18px;
+}
+
+.blueprint-grid p {
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  margin: 0;
+}
+
+/* Implementation brief */
+
+.brief-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.brief-header h3 {
+  margin: 0;
+}
+
+.btn-sm {
+  padding: 8px 14px;
+  font-size: 0.82rem;
+}
+
+.brief-tabs {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 16px;
+}
+
+.tab-btn {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 8px 4px;
+  margin-right: 18px;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.tab-btn.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.brief-panel {
+  display: none;
+  color: var(--text-muted);
+  font-size: 0.92rem;
+  line-height: 1.7;
+  max-width: 760px;
+}
+
+.brief-panel.active {
+  display: block;
+}
+
+/* ============ METHODOLOGY ============ */
+
+.section-kicker {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text);
+  max-width: 640px;
+  margin: 0 0 32px;
+}
+
+.method-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 18px;
+}
+
+.method-step {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px;
+  background: var(--card-bg);
+  box-shadow: var(--shadow);
+}
+
+.method-num {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+
+.method-step h3 {
+  margin: 0 0 6px;
+  font-size: 1rem;
+  color: var(--text);
+}
+
+.method-step p {
+  margin: 0;
+  font-size: 0.86rem;
+  color: var(--text-muted);
+}
+
+/* ============ AI IMPLEMENTATION MAP ============ */
+
+.map-stages {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 24px;
+}
+
+.map-stage {
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.map-stage.active {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
+}
+
+.map-arrow {
+  color: var(--border);
+  font-size: 0.9rem;
+}
+
+.map-panel {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 22px;
+  box-shadow: var(--shadow);
+}
+
+.map-panel h3 {
+  margin: 0 0 12px;
+  color: var(--text);
+}
+
+.map-panel ul {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--text-muted);
+  columns: 2;
+  column-gap: 32px;
+}
+
+.map-panel li {
+  margin-bottom: 8px;
+  break-inside: avoid;
+}
+
+@media (max-width: 640px) {
+  .map-panel ul { columns: 1; }
+}
+
+/* ============ SELECTED WORK ============ */
+
+.work-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+}
+
+.work-card {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 22px;
+  background: var(--card-bg);
+  box-shadow: var(--shadow);
+}
+
+.work-card h3 {
+  margin: 0 0 10px;
+  font-size: 1.05rem;
+  color: var(--text);
+}
+
+.work-card p {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
