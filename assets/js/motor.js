@@ -11,20 +11,38 @@ const CUADRANTE_LABEL = {
   baja_prioridad: "Baja prioridad",
 };
 
+const STAGE_LABEL = {
+  audit: "Agente Auditor",
+  prioritize: "Agente Priorizador",
+  design: "Diseñador de Solución",
+  report: "Agente Reportero",
+};
+
 const $ = (sel) => document.querySelector(sel);
+const $$ = (sel) => Array.from(document.querySelectorAll(sel));
 
 const elProceso = $("#proceso");
 const elBtnRun = $("#btn-run");
 const elBtnEjemplo = $("#btn-ejemplo");
 const elError = $("#error-msg");
 const elBtnDownload = $("#btn-download");
+const elConsole = $("#console");
 
-const stages = {
-  audit: $("#stage-audit"),
-  prioritize: $("#stage-prioritize"),
-  design: $("#stage-design"),
-  report: $("#stage-report"),
-};
+const stepperItems = {};
+$$(".stepper-item").forEach((el) => {
+  stepperItems[el.dataset.stage] = el;
+});
+
+const tabButtons = {};
+$$(".tab-btn").forEach((el) => {
+  tabButtons[el.dataset.tab] = el;
+  el.addEventListener("click", () => showTab(el.dataset.tab));
+});
+
+const tabPanels = {};
+$$(".tab-panel").forEach((el) => {
+  tabPanels[el.dataset.panel] = el;
+});
 
 elBtnEjemplo.addEventListener("click", () => {
   elProceso.value = EJEMPLO_PROCESO;
@@ -32,26 +50,54 @@ elBtnEjemplo.addEventListener("click", () => {
 
 elBtnRun.addEventListener("click", ejecutarPipeline);
 
-function setStage(stage, status, html) {
-  const el = stages[stage];
+function showTab(name) {
+  Object.entries(tabButtons).forEach(([key, btn]) => btn.classList.toggle("active", key === name));
+  Object.entries(tabPanels).forEach(([key, panel]) => panel.classList.toggle("active", key === name));
+}
+
+function log(msg, type) {
+  const line = document.createElement("div");
+  line.className = "console-line" + (type ? ` ${type}` : "");
+  const time = new Date().toLocaleTimeString("es-MX", { hour12: false });
+  line.innerHTML = `<span class="t">${time}</span>${escapeHtml(msg)}`;
+  elConsole.appendChild(line);
+  elConsole.scrollTop = elConsole.scrollHeight;
+}
+
+function clearConsole() {
+  elConsole.innerHTML = "";
+}
+
+function setStageStatus(stage, status) {
+  const el = stepperItems[stage];
   el.classList.remove("active", "done", "error");
-  el.classList.add(status === "ok" ? "done" : status === "error" ? "error" : "active");
+  if (status === "running") el.classList.add("active");
+  if (status === "ok") el.classList.add("done");
+  if (status === "error") el.classList.add("error");
   el.querySelector("[data-status]").textContent =
-    status === "ok" ? "listo" : status === "error" ? "error" : "procesando...";
-  if (html !== undefined) {
-    el.querySelector("[data-body]").innerHTML = html;
-  }
+    status === "running" ? "procesando..." : status === "ok" ? "listo" : status === "error" ? "error" : "en espera";
+}
+
+function setStageTime(stage, ms) {
+  stepperItems[stage].querySelector("[data-time]").textContent = ms ? `${(ms / 1000).toFixed(1)}s` : "";
+}
+
+function setPanel(name, html) {
+  tabPanels[name].innerHTML = html;
 }
 
 function resetPipeline() {
-  Object.keys(stages).forEach((key) => {
-    const el = stages[key];
-    el.classList.remove("active", "done", "error");
-    el.querySelector("[data-status]").textContent = "en espera";
-    el.querySelector("[data-body]").innerHTML = "";
+  Object.keys(stepperItems).forEach((stage) => {
+    setStageStatus(stage, "idle");
+    setStageTime(stage, 0);
+  });
+  Object.keys(tabPanels).forEach((name) => {
+    setPanel(name, `<p class="panel-placeholder">Esperando resultado del ${STAGE_LABEL[name]}...</p>`);
   });
   elBtnDownload.hidden = true;
   elError.hidden = true;
+  clearConsole();
+  showTab("audit");
 }
 
 async function llamarAgente(path, body) {
@@ -65,6 +111,28 @@ async function llamarAgente(path, body) {
     throw new Error(data.error || `Error llamando a ${path}`);
   }
   return data;
+}
+
+async function ejecutarAgente(stage, path, body, onSuccess) {
+  showTab(stage);
+  setStageStatus(stage, "running");
+  log(`→ ${STAGE_LABEL[stage]}: enviando solicitud a Claude...`);
+  const start = performance.now();
+  try {
+    const data = await llamarAgente(path, body);
+    const elapsed = performance.now() - start;
+    setStageTime(stage, elapsed);
+    setStageStatus(stage, "ok");
+    const resumen = onSuccess(data);
+    log(`✓ ${STAGE_LABEL[stage]}: ${resumen} (${(elapsed / 1000).toFixed(1)}s)`, "ok");
+    return data;
+  } catch (err) {
+    const elapsed = performance.now() - start;
+    setStageTime(stage, elapsed);
+    setStageStatus(stage, "error");
+    log(`✗ ${STAGE_LABEL[stage]}: ${err.message}`, "err");
+    throw err;
+  }
 }
 
 function tablaOportunidades(items, conPriorizacion) {
@@ -117,35 +185,51 @@ async function ejecutarPipeline() {
   }
 
   elBtnRun.disabled = true;
+  log("Iniciando pipeline de 4 agentes...");
 
   try {
-    setStage("audit", "running");
-    const { oportunidades } = await llamarAgente("/api/audit", { proceso });
-    setStage("audit", "ok", tablaOportunidades(oportunidades, false));
+    const { oportunidades } = await ejecutarAgente("audit", "/api/audit", { proceso }, (data) => {
+      setPanel("audit", tablaOportunidades(data.oportunidades, false));
+      return `${data.oportunidades.length} oportunidades detectadas`;
+    });
 
-    setStage("prioritize", "running");
-    const { priorizadas } = await llamarAgente("/api/prioritize", { oportunidades });
-    setStage("prioritize", "ok", tablaOportunidades(priorizadas, true));
+    const { priorizadas } = await ejecutarAgente(
+      "prioritize",
+      "/api/prioritize",
+      { oportunidades },
+      (data) => {
+        setPanel("prioritize", tablaOportunidades(data.priorizadas, true));
+        return `priorizadas, top: "${data.priorizadas[0].tarea}"`;
+      }
+    );
 
-    setStage("design", "running");
     const top = priorizadas[0];
-    const { diseno } = await llamarAgente("/api/design-agent", { oportunidad: top });
-    setStage("design", "ok", renderDiseno(diseno));
+    const { diseno } = await ejecutarAgente(
+      "design",
+      "/api/design-agent",
+      { oportunidad: top },
+      (data) => {
+        setPanel("design", renderDiseno(data.diseno));
+        return `solución diseñada: "${data.diseno.nombre_solucion}"`;
+      }
+    );
 
-    setStage("report", "running");
-    const { reporte } = await llamarAgente("/api/report", { proceso, priorizadas, diseno });
-    ultimoReporte = reporte;
-    setStage("report", "ok", `<div class="report-markdown">${escapeHtml(reporte)}</div>`);
+    await ejecutarAgente(
+      "report",
+      "/api/report",
+      { proceso, priorizadas, diseno },
+      (data) => {
+        ultimoReporte = data.reporte;
+        setPanel("report", `<div class="report-markdown">${escapeHtml(data.reporte)}</div>`);
+        return "reporte generado";
+      }
+    );
+
     elBtnDownload.hidden = false;
+    log("Pipeline completo.", "ok");
   } catch (err) {
     elError.textContent = err.message || "Ocurrió un error ejecutando el pipeline.";
     elError.hidden = false;
-    const stageEnCurso = Object.values(stages).find((el) => el.classList.contains("active"));
-    if (stageEnCurso) {
-      stageEnCurso.classList.remove("active");
-      stageEnCurso.classList.add("error");
-      stageEnCurso.querySelector("[data-status]").textContent = "error";
-    }
   } finally {
     elBtnRun.disabled = false;
   }

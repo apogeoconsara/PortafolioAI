@@ -4,92 +4,94 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Motor de Adopción de IA · Sarah Cruz Salazar</title>
-<meta name="description" content="Pipeline de 4 agentes de IA (auditor, priorizador, diseñador, reportero) que audita un proceso de ingeniería en vivo usando Claude.">
+<meta name="description" content="Consola en vivo de 4 agentes de IA (auditor, priorizador, diseñador, reportero) que audita un proceso de ingeniería usando Claude en tiempo real.">
 <link rel="stylesheet" href="assets/css/style.css">
 <link rel="stylesheet" href="assets/css/motor.css">
 </head>
-<body>
+<body class="app-page">
 
-<header class="nav">
-  <div class="container nav-inner">
-    <span class="logo"><a href="index.html">Sarah Cruz Salazar</a></span>
-    <nav>
-      <a href="index.html#proyectos">Proyectos</a>
-      <a href="index.html#contacto">Contacto</a>
-    </nav>
-  </div>
+<header class="app-header">
+  <span class="logo"><a href="index.html">Sarah Cruz Salazar</a></span>
+  <span class="app-header-title">Motor de Adopción de IA · pipeline de 4 agentes sobre Claude</span>
+  <a class="link" href="index.html#proyectos">← Volver al portafolio</a>
 </header>
 
-<section class="hero">
-  <div class="container">
-    <p class="eyebrow">Motor en vivo · 4 agentes de IA encadenados</p>
-    <h1>Motor de Adopción de IA</h1>
-    <p class="lead">
-      Describe un proceso real de tu equipo de ingeniería (pruebas, reportes, diseño o soporte) y este motor
-      ejecuta, con llamadas reales a Claude, el mismo pipeline que un Especialista de Implementación de IA
-      correría en Alten México: <strong>auditar → priorizar → diseñar la solución → reportar</strong>.
-      Cada paso es un agente independiente cuya salida alimenta al siguiente, igual que un pipeline de GTM
-      (prospectar → enriquecer → redactar → enviar), aplicado a ingeniería.
-    </p>
-  </div>
-</section>
+<main class="app-shell">
 
-<section class="section">
-  <div class="container">
-    <label for="proceso" class="field-label">Describe el proceso de ingeniería a auditar</label>
-    <textarea id="proceso" rows="6" placeholder="Ej: Cada sprint, dos ingenieros dedican medio día a ejecutar manualmente 40 casos de prueba de regresión, luego escriben a mano un reporte de resultados para el Líder de Proyecto y contestan por Teams las mismas 5-6 preguntas de configuración de entorno que hacen los ingenieros nuevos cada semana."></textarea>
-    <div class="cta-row">
-      <button id="btn-ejemplo" class="btn btn-outline" type="button">Usar ejemplo</button>
-      <button id="btn-run" class="btn btn-primary" type="button">Ejecutar pipeline de agentes</button>
+  <aside class="app-sidebar">
+    <label for="proceso" class="field-label">Proceso de ingeniería a auditar</label>
+    <textarea id="proceso" rows="5" placeholder="Ej: Cada sprint dos ingenieros ejecutan 40 pruebas de regresión a mano, redactan el reporte para el Líder de Proyecto y responden por Teams las mismas dudas de configuración de los ingenieros nuevos."></textarea>
+    <div class="cta-row compact">
+      <button id="btn-ejemplo" class="btn btn-outline btn-sm" type="button">Usar ejemplo</button>
+      <button id="btn-run" class="btn btn-primary btn-sm" type="button">Ejecutar pipeline</button>
     </div>
     <p id="error-msg" class="error-msg" hidden></p>
 
-    <div class="pipeline">
-      <article class="stage" id="stage-audit">
-        <header class="stage-header">
-          <span class="stage-number">1</span>
-          <h2>Agente Auditor</h2>
-          <span class="stage-status" data-status>en espera</span>
-        </header>
-        <div class="stage-body" data-body></div>
-      </article>
+    <ol class="stepper" id="stepper">
+      <li class="stepper-item" data-stage="audit">
+        <span class="stepper-icon" data-icon></span>
+        <div class="stepper-text">
+          <strong>1 · Agente Auditor</strong>
+          <span class="stepper-status" data-status>en espera</span>
+        </div>
+        <span class="stepper-time" data-time></span>
+      </li>
+      <li class="stepper-item" data-stage="prioritize">
+        <span class="stepper-icon" data-icon></span>
+        <div class="stepper-text">
+          <strong>2 · Agente Priorizador</strong>
+          <span class="stepper-status" data-status>en espera</span>
+        </div>
+        <span class="stepper-time" data-time></span>
+      </li>
+      <li class="stepper-item" data-stage="design">
+        <span class="stepper-icon" data-icon></span>
+        <div class="stepper-text">
+          <strong>3 · Diseñador de Solución</strong>
+          <span class="stepper-status" data-status>en espera</span>
+        </div>
+        <span class="stepper-time" data-time></span>
+      </li>
+      <li class="stepper-item" data-stage="report">
+        <span class="stepper-icon" data-icon></span>
+        <div class="stepper-text">
+          <strong>4 · Agente Reportero</strong>
+          <span class="stepper-status" data-status>en espera</span>
+        </div>
+        <span class="stepper-time" data-time></span>
+      </li>
+    </ol>
 
-      <article class="stage" id="stage-prioritize">
-        <header class="stage-header">
-          <span class="stage-number">2</span>
-          <h2>Agente Priorizador</h2>
-          <span class="stage-status" data-status>en espera</span>
-        </header>
-        <div class="stage-body" data-body></div>
-      </article>
+    <button id="btn-download" class="btn btn-outline btn-sm" type="button" hidden>Descargar reporte (.md)</button>
+  </aside>
 
-      <article class="stage" id="stage-design">
-        <header class="stage-header">
-          <span class="stage-number">3</span>
-          <h2>Agente Diseñador de Solución</h2>
-          <span class="stage-status" data-status>en espera</span>
-        </header>
-        <div class="stage-body" data-body></div>
-      </article>
+  <section class="app-main">
+    <div class="console" id="console" aria-live="polite"></div>
 
-      <article class="stage" id="stage-report">
-        <header class="stage-header">
-          <span class="stage-number">4</span>
-          <h2>Agente Reportero</h2>
-          <span class="stage-status" data-status>en espera</span>
-        </header>
-        <div class="stage-body" data-body></div>
-        <button id="btn-download" class="btn btn-outline" type="button" hidden>Descargar reporte (.md)</button>
-      </article>
+    <div class="tabs" id="tabs">
+      <button class="tab-btn active" data-tab="audit" type="button">Auditor</button>
+      <button class="tab-btn" data-tab="prioritize" type="button">Priorizador</button>
+      <button class="tab-btn" data-tab="design" type="button">Solución</button>
+      <button class="tab-btn" data-tab="report" type="button">Reporte</button>
     </div>
-  </div>
-</section>
 
-<footer class="footer">
-  <div class="container">
-    <p>© 2026 Sarah Cruz Salazar · Motor construido con Netlify Functions + Claude (Anthropic)</p>
-  </div>
-</footer>
+    <div class="tab-panels">
+      <div class="tab-panel active" data-panel="audit">
+        <p class="panel-placeholder">Ejecuta el pipeline para ver aquí las oportunidades detectadas por el Agente Auditor.</p>
+      </div>
+      <div class="tab-panel" data-panel="prioritize">
+        <p class="panel-placeholder">Aquí verás las oportunidades priorizadas por impacto y esfuerzo.</p>
+      </div>
+      <div class="tab-panel" data-panel="design">
+        <p class="panel-placeholder">Aquí verás el diseño de la solución de IA para la oportunidad top.</p>
+      </div>
+      <div class="tab-panel" data-panel="report">
+        <p class="panel-placeholder">Aquí verás el reporte final, listo para descargar.</p>
+      </div>
+    </div>
+  </section>
+
+</main>
 
 <script src="assets/js/motor.js"></script>
 </body>
