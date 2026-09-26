@@ -1,39 +1,95 @@
 /* ============ HERO / CONSOLE ============ */
 
 .console-hero {
-  padding: 56px 0 64px;
-  background: linear-gradient(180deg, var(--accent-soft) 0%, var(--bg) 55%);
+  position: relative;
+  padding: 60px 0 64px;
+  background:
+    radial-gradient(600px 300px at 85% -10%, rgba(29, 78, 216, 0.10), transparent 60%),
+    linear-gradient(180deg, var(--accent-soft) 0%, var(--bg) 55%);
   border-bottom: 1px solid var(--border);
+  overflow: hidden;
 }
 
 .role-line {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   color: var(--accent);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-size: 0.78rem;
   font-weight: 700;
-  margin: 0 0 12px;
+  margin: 0 0 14px;
+}
+
+.role-line::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent-2);
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.15);
 }
 
 .console-hero h1 {
-  font-size: clamp(1.8rem, 3.6vw, 2.6rem);
+  font-weight: 800;
+  font-size: clamp(1.9rem, 3.8vw, 2.75rem);
   max-width: 780px;
-  margin: 0 0 14px;
+  margin: 0 0 16px;
   color: var(--text);
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
 }
 
 .console-hero .lead {
   max-width: 680px;
   color: var(--text-muted);
-  font-size: 1.05rem;
-  margin: 0 0 10px;
+  font-size: 1.08rem;
+  margin: 0 0 24px;
 }
 
-.tags-line {
+/* ---- What I bring (glanceable, above the interactive tool) ---- */
+
+.offer-strip {
+  margin-bottom: 36px;
+}
+
+.offer-strip-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   color: var(--text-muted);
-  font-size: 0.85rem;
-  margin: 0 0 32px;
+  margin: 0 0 12px;
+}
+
+.offer-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
+  max-width: 980px;
+}
+
+.offer-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 0.87rem;
+  color: var(--text);
+  box-shadow: var(--shadow);
+}
+
+.offer-icon {
+  font-size: 1.05rem;
+  line-height: 1.3;
+  flex-shrink: 0;
 }
 
 /* ---- App shell ---- */
@@ -82,52 +138,55 @@
   font-size: 0.88rem;
 }
 
-/* ---- Pipeline ---- */
+/* ---- Pipeline (stepper) ---- */
 
 .pipeline {
   display: flex;
-  align-items: stretch;
-  gap: 8px;
+  align-items: center;
+  gap: 0;
   margin-top: 28px;
   flex-wrap: wrap;
 }
 
 .pipeline-stage {
-  flex: 1;
-  min-width: 130px;
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  align-items: center;
+  gap: 10px;
   border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 12px 14px;
+  border-radius: 999px;
+  padding: 8px 16px 8px 8px;
   background: var(--bg);
   transition: border-color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
 }
 
 .pipeline-num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
   font-size: 0.72rem;
   font-weight: 700;
   color: var(--text-muted);
-  letter-spacing: 0.05em;
+  flex-shrink: 0;
 }
 
 .pipeline-name {
-  font-size: 0.98rem;
+  font-size: 0.86rem;
   font-weight: 700;
   color: var(--text);
-}
-
-.pipeline-desc {
-  font-size: 0.78rem;
-  color: var(--text-muted);
+  white-space: nowrap;
 }
 
 .pipeline-arrow {
   display: flex;
   align-items: center;
   color: var(--border);
-  font-size: 1.1rem;
+  font-size: 1rem;
+  padding: 0 8px;
 }
 
 .pipeline-stage.active {
@@ -136,7 +195,12 @@
   box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
-.pipeline-stage.active .pipeline-num,
+.pipeline-stage.active .pipeline-num {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
 .pipeline-stage.active .pipeline-name {
   color: var(--accent);
 }
@@ -147,12 +211,26 @@
 }
 
 .pipeline-stage.done .pipeline-num {
-  color: var(--accent-2);
+  background: var(--accent-2);
+  border-color: var(--accent-2);
+  color: #fff;
 }
 
 .pipeline-stage.error {
   border-color: #fecdca;
   background: #fef3f2;
+}
+
+.pipeline-stage.error .pipeline-num {
+  background: #b42318;
+  border-color: #b42318;
+  color: #fff;
+}
+
+@media (max-width: 640px) {
+  .pipeline { gap: 8px; }
+  .pipeline-arrow { display: none; }
+  .pipeline-stage { width: 100%; }
 }
 
 /* ---- Live console log ---- */
@@ -230,8 +308,15 @@
 .audit-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 18px;
+  gap: 14px;
   margin-bottom: 20px;
+}
+
+.audit-grid > div {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
 }
 
 .opportunities-title {
@@ -414,7 +499,14 @@
 .blueprint-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 18px;
+  gap: 14px;
+}
+
+.blueprint-grid > div {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
 }
 
 .blueprint-grid p {
@@ -598,19 +690,26 @@
 
 .objective-chip {
   border: 1px solid var(--border);
-  background: var(--bg);
+  background: var(--card-bg);
   border-radius: 999px;
   padding: 9px 16px;
   font-size: 0.84rem;
   font-weight: 600;
   color: var(--text-muted);
   cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.objective-chip:hover {
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .objective-chip.active {
   border-color: var(--accent);
   background: var(--accent);
   color: #fff;
+  box-shadow: var(--shadow-md);
 }
 
 /* ============ Prompt panel ============ */
@@ -659,7 +758,8 @@
 .how-agent {
   background: var(--card-bg);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-top: 3px solid var(--accent);
+  border-radius: 10px;
   padding: 16px;
   box-shadow: var(--shadow);
 }
@@ -689,10 +789,17 @@
   border: 1px solid var(--border);
   background: var(--card-bg);
   border-radius: 999px;
-  padding: 8px 16px;
+  padding: 9px 18px;
   font-size: 0.85rem;
+  font-weight: 500;
   color: var(--text);
   box-shadow: var(--shadow);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.cap-tag:hover {
+  border-color: var(--accent);
+  box-shadow: var(--shadow-md);
 }
 
 /* ============ Contact ============ */
