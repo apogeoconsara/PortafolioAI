@@ -1,0 +1,26 @@
+[
+  {
+    "intencion": "configuracion",
+    "palabras_clave": ["configurar", "instalar", "entorno", "setup", "ambiente"],
+    "pregunta": "¿Cómo configuro mi entorno local de pruebas?",
+    "respuesta": "Clona el repositorio del proyecto, ejecuta 'make setup' y copia el archivo .env.example a .env. La guía completa está en Confluence > Ingeniería > Entornos locales."
+  },
+  {
+    "intencion": "documentacion",
+    "palabras_clave": ["documentacion", "documentación", "manual", "guia", "guía", "donde esta", "dónde está"],
+    "pregunta": "¿Dónde encuentro la documentación del proyecto?",
+    "respuesta": "La documentación técnica vive en el espacio de Confluence del proyecto, sección 'Arquitectura'. Los runbooks operativos están en SharePoint > Equipo > Runbooks."
+  },
+  {
+    "intencion": "bug",
+    "palabras_clave": ["error", "falla", "bug", "no funciona", "crash"],
+    "pregunta": "Encontré un error en la aplicación, ¿qué hago?",
+    "respuesta": "Registra un ticket en Jira con la etiqueta 'bug', incluye pasos para reproducir y el log del error. El equipo de guardia revisa tickets con esa etiqueta cada 2 horas hábiles."
+  },
+  {
+    "intencion": "acceso",
+    "palabras_clave": ["acceso", "permiso", "no puedo entrar", "password", "contraseña"],
+    "pregunta": "No tengo acceso a una herramienta que necesito",
+    "respuesta": "Solicita el acceso desde el portal de NetSuite > Solicitudes de IT, seleccionando la herramienta y el rol requerido. Aprobación típica: 24 horas hábiles."
+  }
+]

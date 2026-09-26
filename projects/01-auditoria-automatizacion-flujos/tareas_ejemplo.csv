@@ -1,0 +1,7 @@
+tarea,horas_por_ocurrencia,ocurrencias_por_mes,es_repetitiva,es_texto_o_datos,error_bajo_costo
+Generar reporte semanal de avance,2,4,1,1,1
+Ejecutar smoke tests manuales,1,12,1,0,1
+Revisar checklist de diseño,1,5,1,1,0
+Redactar minuta de reunión de status,0.5,8,1,1,1
+Clasificar tickets entrantes de soporte,0.25,40,1,1,1
+Actualizar documentación técnica tras cada release,3,2,0,1,1
