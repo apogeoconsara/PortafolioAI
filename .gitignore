@@ -1,3 +1,5 @@
 __pycache__/
 *.pyc
 hallazgos.csv
+node_modules/
+.netlify/

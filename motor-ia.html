@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Motor de Adopción de IA · Sarah Cruz Salazar</title>
+<meta name="description" content="Pipeline de 4 agentes de IA (auditor, priorizador, diseñador, reportero) que audita un proceso de ingeniería en vivo usando Claude.">
+<link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="assets/css/motor.css">
+</head>
+<body>
+
+<header class="nav">
+  <div class="container nav-inner">
+    <span class="logo"><a href="index.html">Sarah Cruz Salazar</a></span>
+    <nav>
+      <a href="index.html#proyectos">Proyectos</a>
+      <a href="index.html#contacto">Contacto</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="container">
+    <p class="eyebrow">Motor en vivo · 4 agentes de IA encadenados</p>
+    <h1>Motor de Adopción de IA</h1>
+    <p class="lead">
+      Describe un proceso real de tu equipo de ingeniería (pruebas, reportes, diseño o soporte) y este motor
+      ejecuta, con llamadas reales a Claude, el mismo pipeline que un Especialista de Implementación de IA
+      correría en Alten México: <strong>auditar → priorizar → diseñar la solución → reportar</strong>.
+      Cada paso es un agente independiente cuya salida alimenta al siguiente, igual que un pipeline de GTM
+      (prospectar → enriquecer → redactar → enviar), aplicado a ingeniería.
+    </p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <label for="proceso" class="field-label">Describe el proceso de ingeniería a auditar</label>
+    <textarea id="proceso" rows="6" placeholder="Ej: Cada sprint, dos ingenieros dedican medio día a ejecutar manualmente 40 casos de prueba de regresión, luego escriben a mano un reporte de resultados para el Líder de Proyecto y contestan por Teams las mismas 5-6 preguntas de configuración de entorno que hacen los ingenieros nuevos cada semana."></textarea>
+    <div class="cta-row">
+      <button id="btn-ejemplo" class="btn btn-outline" type="button">Usar ejemplo</button>
+      <button id="btn-run" class="btn btn-primary" type="button">Ejecutar pipeline de agentes</button>
+    </div>
+    <p id="error-msg" class="error-msg" hidden></p>
+
+    <div class="pipeline">
+      <article class="stage" id="stage-audit">
+        <header class="stage-header">
+          <span class="stage-number">1</span>
+          <h2>Agente Auditor</h2>
+          <span class="stage-status" data-status>en espera</span>
+        </header>
+        <div class="stage-body" data-body></div>
+      </article>
+
+      <article class="stage" id="stage-prioritize">
+        <header class="stage-header">
+          <span class="stage-number">2</span>
+          <h2>Agente Priorizador</h2>
+          <span class="stage-status" data-status>en espera</span>
+        </header>
+        <div class="stage-body" data-body></div>
+      </article>
+
+      <article class="stage" id="stage-design">
+        <header class="stage-header">
+          <span class="stage-number">3</span>
+          <h2>Agente Diseñador de Solución</h2>
+          <span class="stage-status" data-status>en espera</span>
+        </header>
+        <div class="stage-body" data-body></div>
+      </article>
+
+      <article class="stage" id="stage-report">
+        <header class="stage-header">
+          <span class="stage-number">4</span>
+          <h2>Agente Reportero</h2>
+          <span class="stage-status" data-status>en espera</span>
+        </header>
+        <div class="stage-body" data-body></div>
+        <button id="btn-download" class="btn btn-outline" type="button" hidden>Descargar reporte (.md)</button>
+      </article>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <p>© 2026 Sarah Cruz Salazar · Motor construido con Netlify Functions + Claude (Anthropic)</p>
+  </div>
+</footer>
+
+<script src="assets/js/motor.js"></script>
+</body>
+</html>
