@@ -7,6 +7,7 @@
 <meta name="description" content="AI Implementation Console: audit an engineering workflow, prioritize the opportunity, design the AI solution and get an implementation brief — live, powered by Claude.">
 <link rel="stylesheet" href="assets/css/style.css">
 <link rel="stylesheet" href="assets/css/console.css">
+<link rel="stylesheet" href="assets/css/case.css">
 </head>
 <body>
 
@@ -16,8 +17,9 @@
     <nav>
       <a href="#console">Console</a>
       <a href="#methodology">Methodology</a>
-      <a href="#map">Implementation Map</a>
       <a href="#work">Selected Work</a>
+      <a href="#enablement">Enablement</a>
+      <a href="#toolkit">Toolkit</a>
       <a href="#contact">Contact</a>
     </nav>
   </div>
@@ -109,6 +111,11 @@
       <!-- ===== 5. AI SOLUTION BLUEPRINT ===== -->
       <div class="result-panel" id="panel-design" hidden>
         <h3>AI Solution Blueprint</h3>
+        <p class="verdict-tagline">Not every workflow needs an AI agent.</p>
+        <div class="verdict-box">
+          <span class="verdict-badge" data-field="implementation_verdict"></span>
+          <p class="verdict-reason" data-field="verdict_reason"></p>
+        </div>
         <p class="panel-lede" data-field="problem"></p>
         <span class="approach-badge" data-field="recommended_approach"></span>
 
@@ -142,7 +149,6 @@
       <div class="result-panel" id="panel-report" hidden>
         <div class="brief-header">
           <h3>Implementation Brief</h3>
-          <button id="btn-download" class="btn btn-outline btn-sm" type="button">Export implementation brief</button>
         </div>
         <div class="brief-tabs" id="brief-tabs">
           <button class="tab-btn active" data-brief-tab="executive_summary" type="button">Executive Summary</button>
@@ -157,6 +163,19 @@
           <p class="brief-panel" data-brief-panel="adoption_plan"></p>
           <p class="brief-panel" data-brief-panel="metrics"></p>
           <p class="brief-panel" data-brief-panel="documentation"></p>
+        </div>
+
+        <div class="export-block">
+          <h4>Export for implementation</h4>
+          <p class="export-hint">Generated preview — not a live Confluence/Jira integration, but the same handoff step a real implementation would need.</p>
+          <div class="export-tabs" id="export-tabs">
+            <button class="tab-btn active" data-export="executive" type="button">Executive Brief</button>
+            <button class="tab-btn" data-export="confluence" type="button">Confluence Page</button>
+            <button class="tab-btn" data-export="jira" type="button">Jira Epic</button>
+            <button class="tab-btn" data-export="markdown" type="button">Markdown</button>
+          </div>
+          <pre class="export-preview" id="export-preview"></pre>
+          <button id="btn-download" class="btn btn-outline btn-sm" type="button">Download this format</button>
         </div>
       </div>
 
@@ -180,59 +199,128 @@
   </div>
 </section>
 
-<!-- ============ 8. AI IMPLEMENTATION MAP ============ -->
-<section id="map" class="section alt">
+<!-- ============ 8. SELECTED IMPLEMENTATIONS ============ -->
+<section id="work" class="section alt">
   <div class="container">
-    <h2>Where AI can enter the engineering workflow</h2>
-    <div class="map-stages" id="map-stages">
-      <button class="map-stage" data-map="requirements" type="button">Requirements</button>
-      <span class="map-arrow">→</span>
-      <button class="map-stage" data-map="design" type="button">Design</button>
-      <span class="map-arrow">→</span>
-      <button class="map-stage" data-map="development" type="button">Development</button>
-      <span class="map-arrow">→</span>
-      <button class="map-stage active" data-map="testing" type="button">Testing</button>
-      <span class="map-arrow">→</span>
-      <button class="map-stage" data-map="reporting" type="button">Reporting</button>
-      <span class="map-arrow">→</span>
-      <button class="map-stage" data-map="knowledge" type="button">Knowledge</button>
-      <span class="map-arrow">→</span>
-      <button class="map-stage" data-map="pm" type="button">Project Management</button>
-    </div>
-    <div class="map-panel" id="map-panel">
-      <h3 id="map-panel-title">Testing</h3>
-      <ul id="map-panel-list"></ul>
+    <h2>3 Selected Implementations</h2>
+    <p class="section-intro">Not slideware — a live system and two pieces of working code, each proof of a different part of the methodology above.</p>
+
+    <div class="work-grid">
+      <article class="work-card">
+        <span class="tag">Live · This page</span>
+        <h3>AI Adoption Engine</h3>
+        <p>The 4-agent console above, running against whatever workflow you just typed in. The clearest proof available: try it yourself before reading anyone's claims about it.</p>
+        <a class="link" href="#console">Run it again ↑</a>
+      </article>
+
+      <article class="work-card">
+        <span class="tag">Operational automation</span>
+        <h3>Workflow Audit Framework</h3>
+        <p>An audit checklist plus a scoring script that turns a team's task inventory into a ranked, inspectable automation backlog — the reasoning behind the Console's Audit/Prioritize stages, made explicit.</p>
+        <a class="link" href="case-audit-automation.html">Read the case study →</a>
+      </article>
+
+      <article class="work-card">
+        <span class="tag">Agent / workflow</span>
+        <h3>Support Agent Prototype</h3>
+        <p>A working agent that classifies, retrieves, and escalates to a human when confidence is low — escalation-by-design, the pattern that matters more than the model behind it.</p>
+        <a class="link" href="case-support-agent.html">Read the case study →</a>
+      </article>
     </div>
   </div>
 </section>
 
-<!-- ============ 9. SELECTED WORK ============ -->
-<section id="work" class="section">
+<!-- ============ 9. AI ENABLEMENT & DOCUMENTATION ============ -->
+<section id="enablement" class="section">
   <div class="container">
-    <h2>Selected AI &amp; Automation Work</h2>
-    <p class="section-intro">Three pieces of working code, not slideware — each one proof of a specific part of the methodology above.</p>
+    <h2>AI Enablement &amp; Documentation</h2>
+    <p class="section-intro">Alten weighs this heavily, for good reason: a solution nobody was trained to run doesn't get adopted.</p>
 
-    <div class="work-grid">
-      <article class="work-card">
-        <span class="tag">Audit → Prioritize</span>
-        <h3>Workflow Audit Framework</h3>
-        <p>A repeatable audit checklist plus a scoring script that turns a team's task inventory into a ranked automation backlog — the same logic behind the Audit/Prioritize agents above, runnable on real project data.</p>
-        <a class="link" href="https://github.com/apogeoconsara/PortafolioAI/tree/main/projects/01-auditoria-automatizacion-flujos" target="_blank" rel="noopener">View the code →</a>
-      </article>
+    <div class="enablement-card">
+      <h3>AI Enablement Kit</h3>
+      <ul class="enablement-list">
+        <li>Prompt Engineering Playbook</li>
+        <li>Building Your First Agent</li>
+        <li>AI Usage Guidelines</li>
+        <li>Workshop Structure</li>
+        <li>Adoption Measurement</li>
+      </ul>
+      <button id="btn-preview-kit" class="btn btn-primary btn-sm" type="button">Preview training kit</button>
+    </div>
+  </div>
+</section>
 
-      <article class="work-card">
-        <span class="tag">AI Agent · Support</span>
-        <h3>Support Agent Prototype</h3>
-        <p>A working agent that classifies incoming questions, retrieves the answer from a knowledge base, and escalates to a human when confidence is low — the escalation-by-design pattern any internal AI agent needs.</p>
-        <a class="link" href="https://github.com/apogeoconsara/PortafolioAI/tree/main/projects/02-agente-ia-soporte-tecnico" target="_blank" rel="noopener">View the code →</a>
-      </article>
+<!-- Enablement kit modal -->
+<div class="modal-overlay" id="kit-modal" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="kit-modal-title">
+    <div class="modal-header">
+      <h3 id="kit-modal-title">AI Enablement Kit — Preview</h3>
+      <button id="btn-close-kit" class="modal-close" type="button" aria-label="Close">×</button>
+    </div>
+    <div class="modal-body">
+      <section class="kit-section">
+        <h4>Prompt Engineering Playbook</h4>
+        <p>5 before/after prompts for common engineering tasks (test case generation, status summaries, design review), each with the structure that made it better: role, format, explicit constraints — plus a script that estimates the token/response savings.</p>
+      </section>
+      <section class="kit-section">
+        <h4>Building Your First Agent</h4>
+        <p>Session 3 of the 4-part program: pairs build a minimal classify → retrieve → escalate prototype for one of their own tasks, using the same pattern as the Support Agent case study, and demo it in 5 minutes.</p>
+      </section>
+      <section class="kit-section">
+        <h4>AI Usage Guidelines</h4>
+        <p>What stays human-led, what data should never go into a prompt, and when to escalate instead of trust a confident-sounding answer — the non-negotiables from the Support Agent's design carried into a written policy.</p>
+      </section>
+      <section class="kit-section">
+        <h4>Workshop Structure</h4>
+        <p>4 sessions × 1.5 hours: Fundamentals &amp; use-case spotting → Prompt engineering &amp; token optimization → Build your first agent → Measurement, governance and documentation. Every session ends with a participant-made deliverable, not just slides.</p>
+      </section>
+      <section class="kit-section">
+        <h4>Adoption Measurement</h4>
+        <p>A re-audit at 4 weeks using the same audit checklist, plus a lightweight internal-doc template (Confluence/SharePoint-ready) so every new tool ships with an owner, a "what NOT to use this for," and a measured before/after.</p>
+      </section>
+      <a class="link" href="https://github.com/apogeoconsara/PortafolioAI/tree/main/projects/05-capacitacion-gestion-cambio" target="_blank" rel="noopener">View the full training plan on GitHub →</a>
+    </div>
+  </div>
+</div>
 
-      <article class="work-card">
-        <span class="tag">Analytics · Adoption</span>
-        <h3>Adoption Analytics Model</h3>
-        <p>A data model, SQL queries and a Power BI spec to answer the question every Technical Director asks after a pilot: is this actually saving time, and for which teams.</p>
-        <a class="link" href="https://github.com/apogeoconsara/PortafolioAI/tree/main/projects/04-dashboard-adopcion-ia" target="_blank" rel="noopener">View the code →</a>
-      </article>
+<!-- ============ 10. TECHNICAL TOOLKIT ============ -->
+<section id="toolkit" class="section alt">
+  <div class="container">
+    <h2>Technical Toolkit</h2>
+    <p class="section-intro">Deliberately split in two — what I've actually built with, versus what the same principles transfer to.</p>
+    <div class="toolkit-grid">
+      <div class="toolkit-col">
+        <h3><span class="badge badge-high">Hands-on</span></h3>
+        <ul>
+          <li>Claude / Anthropic API — structured JSON outputs, chained multi-step pipelines</li>
+          <li>Python — scoring scripts, rule-based agents</li>
+          <li>SQL — data modeling for adoption metrics</li>
+          <li>JavaScript, serverless functions (Netlify)</li>
+          <li>Prompt engineering &amp; schema design</li>
+          <li>Git / GitHub</li>
+        </ul>
+      </div>
+      <div class="toolkit-col">
+        <h3><span class="badge badge-medium">Adaptable to enterprise environments</span></h3>
+        <ul>
+          <li>Mistral, Copilot, Glean — same LLM-integration architecture as above, different vendor</li>
+          <li>Jira, Confluence, NetSuite — same documentation/handoff pattern shown in the Implementation Brief</li>
+          <li>Power BI — same data-modeling principles proven in the SQL adoption model</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 11. ROLE ALIGNMENT ============ -->
+<section id="alignment" class="section">
+  <div class="container">
+    <h2>What this demonstrates</h2>
+    <div class="alignment-grid">
+      <div class="alignment-item"><strong>Reading a process before recommending anything.</strong><p>The Console's Audit stage — and the Workflow Audit Framework case study built the same way.</p></div>
+      <div class="alignment-item"><strong>Prioritizing with judgment, not hype.</strong><p>The Prioritize stage never invents ROI or hours saved without baseline data.</p></div>
+      <div class="alignment-item"><strong>Choosing the right intervention — including none.</strong><p>The Design stage's verdict system, and the Support Agent's escalate-instead-of-guess default.</p></div>
+      <div class="alignment-item"><strong>Handing off something a team can run without me.</strong><p>The Implementation Brief, its Confluence/Jira export formats, and the Enablement Kit.</p></div>
     </div>
   </div>
 </section>

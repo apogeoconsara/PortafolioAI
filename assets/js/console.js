@@ -159,8 +159,19 @@ function renderPrioritization(payload) {
 
 /* ============ Rendering: Blueprint ============ */
 
+const VERDICT_LABEL = {
+  no_automation: "No automation",
+  prompt: "Prompt",
+  deterministic_automation: "Deterministic automation",
+  rag_assistant: "RAG assistant",
+  ai_agent: "AI Agent",
+};
+
 function renderBlueprint(blueprint) {
   const panel = $("#panel-design");
+  panel.querySelector('[data-field="implementation_verdict"]').textContent =
+    VERDICT_LABEL[blueprint.implementation_verdict] || blueprint.implementation_verdict;
+  panel.querySelector('[data-field="verdict_reason"]').textContent = blueprint.verdict_reason;
   panel.querySelector('[data-field="problem"]').textContent = blueprint.problem;
   panel.querySelector('[data-field="recommended_approach"]').textContent = blueprint.recommended_approach;
   fillList(panel.querySelector('[data-field="inputs"]'), blueprint.inputs);
@@ -175,52 +186,6 @@ function renderBlueprint(blueprint) {
 }
 
 /* ============ Rendering: Implementation Brief ============ */
-
-let lastBriefMarkdown = "";
-
-function buildBriefMarkdown(workflow, audit, opportunity, blueprint, brief) {
-  return `# Implementation Brief
-
-## Workflow audited
-${workflow}
-
-## Executive Summary
-${brief.executive_summary}
-
-## Technical Approach
-${brief.technical_approach}
-
-## Adoption Plan
-${brief.adoption_plan}
-
-## Metrics
-${brief.metrics}
-
-## Documentation
-${brief.documentation}
-
----
-
-## Appendix: Workflow Audit
-- Current process: ${audit.current_process}
-- Bottlenecks: ${audit.bottlenecks.join("; ")}
-- Repetitive work: ${audit.repetitive_work.join("; ")}
-- Human decision points: ${audit.human_decision_points.join("; ")}
-- Potential risks: ${audit.potential_risks.join("; ")}
-
-## Appendix: Prioritized Opportunity
-- Opportunity: ${opportunity.opportunity}
-- Business impact: ${opportunity.business_impact} · Effort: ${opportunity.implementation_effort} · Risk: ${opportunity.risk}
-- Priority: ${opportunity.recommended_priority}
-
-## Appendix: AI Solution Blueprint
-- Recommended approach: ${blueprint.recommended_approach}
-- AI role: ${blueprint.ai_role}
-- Human role: ${blueprint.human_role}
-- Integration point: ${blueprint.integration_point}
-- Implementation steps: ${blueprint.implementation_steps.join(" → ")}
-`;
-}
 
 function renderBrief(brief) {
   const panel = $("#panel-report");
@@ -240,12 +205,155 @@ $$("#brief-tabs .tab-btn").forEach((btn) => {
   });
 });
 
+/* ============ Export for implementation (generated previews) ============ */
+
+let pipelineData = null; // { workflow, audit, opportunity, blueprint, brief }
+let currentExportFormat = "executive";
+
+function generateExecutiveBrief(d) {
+  return `EXECUTIVE BRIEF
+${d.opportunity.opportunity}
+
+${d.brief.executive_summary}
+
+Recommended approach: ${VERDICT_LABEL[d.blueprint.implementation_verdict] || d.blueprint.implementation_verdict} — ${d.blueprint.recommended_approach}
+Why this level: ${d.blueprint.verdict_reason}
+
+Impact: ${d.opportunity.business_impact} · Effort: ${d.opportunity.implementation_effort} · Risk: ${d.opportunity.risk}
+
+Metrics: ${d.brief.metrics}`;
+}
+
+function generateConfluencePage(d) {
+  return `h1. ${d.opportunity.opportunity} — Implementation Brief
+
+h2. Executive Summary
+${d.brief.executive_summary}
+
+h2. Current Process
+${d.audit.current_process}
+
+h2. Technical Approach
+${d.brief.technical_approach}
+
+h2. Adoption Plan
+${d.brief.adoption_plan}
+
+h2. Metrics
+${d.brief.metrics}
+
+h2. Documentation
+${d.brief.documentation}
+
+{note}
+Generated preview — paste into Confluence and adjust formatting as needed. Not a live Confluence integration.
+{note}`;
+}
+
+function generateJiraEpic(d) {
+  const steps = d.blueprint.implementation_steps
+    .map((s, i) => `${i + 1}. ${s}`)
+    .join("\n");
+  const risks = d.blueprint.risks.map((r) => `- ${r}`).join("\n");
+  return `Epic Name: ${d.opportunity.opportunity}
+
+Summary:
+${d.blueprint.problem}
+
+Description:
+${d.brief.technical_approach}
+
+AI role: ${d.blueprint.ai_role}
+Human role: ${d.blueprint.human_role}
+Integration point: ${d.blueprint.integration_point}
+
+Acceptance Criteria:
+${steps}
+
+Risks:
+${risks}
+
+Priority: ${PRIORITY_LABEL[d.opportunity.recommended_priority] || d.opportunity.recommended_priority}
+Labels: ai-implementation, ${d.blueprint.implementation_verdict}`;
+}
+
+function generateMarkdown(d) {
+  return `# Implementation Brief
+
+## Workflow audited
+${d.workflow}
+
+## Executive Summary
+${d.brief.executive_summary}
+
+## Technical Approach
+${d.brief.technical_approach}
+
+## Adoption Plan
+${d.brief.adoption_plan}
+
+## Metrics
+${d.brief.metrics}
+
+## Documentation
+${d.brief.documentation}
+
+---
+
+## Appendix: Workflow Audit
+- Current process: ${d.audit.current_process}
+- Bottlenecks: ${d.audit.bottlenecks.join("; ")}
+- Repetitive work: ${d.audit.repetitive_work.join("; ")}
+- Human decision points: ${d.audit.human_decision_points.join("; ")}
+- Potential risks: ${d.audit.potential_risks.join("; ")}
+
+## Appendix: Prioritized Opportunity
+- Opportunity: ${d.opportunity.opportunity}
+- Business impact: ${d.opportunity.business_impact} · Effort: ${d.opportunity.implementation_effort} · Risk: ${d.opportunity.risk}
+- Priority: ${d.opportunity.recommended_priority}
+
+## Appendix: AI Solution Blueprint
+- Verdict: ${VERDICT_LABEL[d.blueprint.implementation_verdict] || d.blueprint.implementation_verdict} (${d.blueprint.verdict_reason})
+- Recommended approach: ${d.blueprint.recommended_approach}
+- AI role: ${d.blueprint.ai_role}
+- Human role: ${d.blueprint.human_role}
+- Integration point: ${d.blueprint.integration_point}
+- Implementation steps: ${d.blueprint.implementation_steps.join(" → ")}
+`;
+}
+
+const EXPORT_GENERATORS = {
+  executive: { generate: generateExecutiveBrief, filename: "executive-brief.txt", mime: "text/plain" },
+  confluence: { generate: generateConfluencePage, filename: "confluence-page.txt", mime: "text/plain" },
+  jira: { generate: generateJiraEpic, filename: "jira-epic.txt", mime: "text/plain" },
+  markdown: { generate: generateMarkdown, filename: "implementation-brief.md", mime: "text/markdown" },
+};
+
+function renderExportPreview() {
+  const el = $("#export-preview");
+  if (!pipelineData) {
+    el.textContent = "";
+    return;
+  }
+  el.textContent = EXPORT_GENERATORS[currentExportFormat].generate(pipelineData);
+}
+
+$$("#export-tabs .tab-btn").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    $$("#export-tabs .tab-btn").forEach((b) => b.classList.toggle("active", b === btn));
+    currentExportFormat = btn.dataset.export;
+    renderExportPreview();
+  });
+});
+
 $("#btn-download").addEventListener("click", () => {
-  const blob = new Blob([lastBriefMarkdown], { type: "text/markdown" });
+  if (!pipelineData) return;
+  const { generate, filename, mime } = EXPORT_GENERATORS[currentExportFormat];
+  const blob = new Blob([generate(pipelineData)], { type: mime });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = "implementation-brief.md";
+  a.download = filename;
   a.click();
   URL.revokeObjectURL(url);
 });
@@ -267,6 +375,7 @@ function resetUI() {
   Object.keys(pipelineStages).forEach((stage) => setStage(stage, null));
   elLog.innerHTML = "";
   elError.hidden = true;
+  pipelineData = null;
   ["audit", "prioritize", "design", "report"].forEach((name) => {
     $(`#panel-${name}`).hidden = true;
   });
@@ -291,7 +400,7 @@ async function runPipeline() {
       return `${data.audit.opportunities.length} opportunities identified`;
     });
 
-    const { matrix, data_note } = await runStage(
+    const { matrix } = await runStage(
       "prioritize",
       "/api/prioritize",
       { opportunities: audit.opportunities },
@@ -308,24 +417,23 @@ async function runPipeline() {
       { opportunity: topOpportunity },
       (data) => {
         renderBlueprint(data.blueprint);
-        return `recommended approach: ${data.blueprint.recommended_approach}`;
+        return `verdict: ${VERDICT_LABEL[data.blueprint.implementation_verdict] || data.blueprint.implementation_verdict}`;
       }
     );
 
-    const { brief } = await runStage(
+    await runStage(
       "report",
       "/api/report",
       { process: workflow, audit, opportunity: topOpportunity, blueprint },
       (data) => {
         renderBrief(data.brief);
-        lastBriefMarkdown = buildBriefMarkdown(workflow, audit, topOpportunity, blueprint, data.brief);
+        pipelineData = { workflow, audit, opportunity: topOpportunity, blueprint, brief: data.brief };
+        renderExportPreview();
         return "implementation brief generated";
       }
     );
 
     log("Pipeline complete.", "ok");
-    void data_note;
-    void brief;
   } catch (err) {
     elError.textContent = err.message || "The pipeline failed to complete.";
     elError.hidden = false;
@@ -334,74 +442,27 @@ async function runPipeline() {
   }
 }
 
-/* ============ AI Implementation Map (static, no API call) ============ */
+/* ============ Enablement kit modal ============ */
 
-const MAP_DATA = {
-  requirements: [
-    "Draft-to-checklist gap analysis against acceptance criteria",
-    "Summarizing stakeholder requirements from meeting notes",
-    "Flagging ambiguous or conflicting requirements early",
-  ],
-  design: [
-    "Design checklist review against standards",
-    "Drafting first-pass technical documentation from specs",
-    "Comparing a new design against prior similar designs",
-  ],
-  development: [
-    "Code review assistance and pattern flagging",
-    "Boilerplate and repetitive code generation",
-    "Explaining legacy code sections to new engineers",
-  ],
-  testing: [
-    "Test case generation",
-    "Failure summarization",
-    "Regression analysis support",
-    "Technical documentation",
-    "Automated reporting",
-  ],
-  reporting: [
-    "Project status summaries",
-    "Cross-source information consolidation",
-    "Risk identification",
-    "Stakeholder reporting",
-  ],
-  knowledge: [
-    "Internal AI assistant",
-    "Knowledge retrieval",
-    "Technical Q&A",
-    "Documentation search",
-  ],
-  pm: [
-    "Sprint status consolidation across Jira/Confluence",
-    "Meeting notes to action items",
-    "Early risk flagging from status patterns",
-  ],
-};
+const elKitModal = $("#kit-modal");
+const elBtnPreviewKit = $("#btn-preview-kit");
+const elBtnCloseKit = $("#btn-close-kit");
 
-const MAP_TITLE = {
-  requirements: "Requirements",
-  design: "Design",
-  development: "Development",
-  testing: "Testing",
-  reporting: "Reporting",
-  knowledge: "Knowledge",
-  pm: "Project Management",
-};
-
-$$(".map-stage").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    $$(".map-stage").forEach((b) => b.classList.toggle("active", b === btn));
-    const key = btn.dataset.map;
-    $("#map-panel-title").textContent = MAP_TITLE[key];
-    $("#map-panel-list").innerHTML = MAP_DATA[key].map((i) => `<li>${escapeHtml(i)}</li>`).join("");
+if (elBtnPreviewKit) {
+  elBtnPreviewKit.addEventListener("click", () => {
+    elKitModal.hidden = false;
   });
-});
-
-// Initialize map panel with the default active stage (Testing).
-const initialMapStage = $(".map-stage.active") || $(".map-stage");
-if (initialMapStage) {
-  $("#map-panel-title").textContent = MAP_TITLE[initialMapStage.dataset.map];
-  $("#map-panel-list").innerHTML = MAP_DATA[initialMapStage.dataset.map]
-    .map((i) => `<li>${escapeHtml(i)}</li>`)
-    .join("");
+}
+if (elBtnCloseKit) {
+  elBtnCloseKit.addEventListener("click", () => {
+    elKitModal.hidden = true;
+  });
+}
+if (elKitModal) {
+  elKitModal.addEventListener("click", (e) => {
+    if (e.target === elKitModal) elKitModal.hidden = true;
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") elKitModal.hidden = true;
+  });
 }

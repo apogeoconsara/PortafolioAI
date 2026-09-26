@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Support Agent Prototype · Case Study · Sarahí Cruz Salazar</title>
+<meta name="description" content="Case study: a support agent that classifies, retrieves and escalates — the confidence-threshold escalation pattern any internal AI agent needs.">
+<link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="assets/css/console.css">
+<link rel="stylesheet" href="assets/css/case.css">
+</head>
+<body>
+
+<header class="nav">
+  <div class="container nav-inner">
+    <span class="logo"><a href="index.html">Sarahí Cruz Salazar</a></span>
+    <nav>
+      <a href="index.html#console">Console</a>
+      <a href="index.html#work">Selected Work</a>
+      <a href="index.html#contact">Contact</a>
+    </nav>
+  </div>
+</header>
+
+<section class="case-hero">
+  <div class="container">
+    <p class="case-eyebrow">Case 02 · Agent / Workflow</p>
+    <h1>Support Agent Prototype</h1>
+    <p class="lead">A working agent that classifies, retrieves, and — critically — knows when NOT to
+    answer. Escalation-by-design, not an afterthought.</p>
+    <div class="case-tags">
+      <span class="badge badge-intervention">Hands-on: classify → retrieve → escalate pattern, Python</span>
+      <span class="badge badge-intervention">Adaptable: Mistral/Copilot/Glean as the model layer</span>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container case-body">
+
+    <div class="case-block">
+      <h2>Problem</h2>
+      <p>Support channels get the same handful of questions on repeat — environment setup, "where's the
+      doc," "how do I reopen a ticket" — eating senior engineers' time. The naive fix is "put an LLM in
+      front of it." The actual risk is an LLM confidently answering a question it shouldn't, on an internal
+      support channel people trust.</p>
+    </div>
+
+    <div class="case-block">
+      <h2>Process</h2>
+      <p>Every incoming question goes through the same three steps, in order:</p>
+      <ol>
+        <li>Classify intent against a small set of categories (setup, documentation, bug, access).</li>
+        <li>Retrieve the closest matching answer from a knowledge base.</li>
+        <li>Check confidence against a threshold. Above it, answer. Below it, <strong>escalate to a
+        human</strong> instead of guessing.</li>
+      </ol>
+    </div>
+
+    <div class="case-block">
+      <h2>Architecture</h2>
+      <p>Written with zero external dependencies so the pattern is fully readable — no API key required to
+      see the logic run. The classifier is keyword-matching and the retrieval is a small local
+      <code>kb.json</code>, but the <strong>architecture is the same one used to put a real LLM in
+      production</strong>: swap the classifier for a classification prompt, and the local KB for a vector
+      index over Confluence/SharePoint, and nothing else about the flow changes.</p>
+    </div>
+
+    <div class="case-block">
+      <h2>Decision</h2>
+      <p>The one design decision that matters here is the confidence threshold and the escalation fallback
+      — not the model. An internal support agent that occasionally invents an answer is worse than no
+      agent at all. This prototype makes "escalate instead of guess" the default behavior, not something
+      bolted on after a production incident.</p>
+      <table class="case-table">
+        <thead><tr><th>Current component</th><th>Suggested production replacement</th></tr></thead>
+        <tbody>
+          <tr><td>Keyword classifier</td><td>Classification prompt on Mistral/Copilot</td></tr>
+          <tr><td>Static <code>kb.json</code></td><td>Glean, or a vector index over Confluence/SharePoint</td></tr>
+          <tr><td>Fixed confidence threshold</td><td>Calibrated against real resolved/escalated ticket data</td></tr>
+          <tr><td>Console demo</td><td>Integrated into the support channel (Teams, Slack, Jira)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="case-block">
+      <h2>Result</h2>
+      <p>Verified output from actually running the script:</p>
+      <pre class="case-pre">Pregunta: ¿Cómo configuro mi entorno local?
+Estado: respondido (confianza=0.2)
+Respuesta: Clona el repositorio del proyecto, ejecuta 'make setup'...
+
+Pregunta: Encontré un bug raro al guardar el reporte
+Estado: respondido (confianza=0.2)
+Respuesta: Registra un ticket en Jira con la etiqueta 'bug'...
+
+Pregunta: ¿Cuál es el sentido de la vida?
+Estado: escalado_a_humano (confianza=0.0)
+Respuesta: No tengo suficiente confianza para responder esto
+directamente. Se creó un ticket para que un ingeniero del
+equipo lo revise.</pre>
+      <p>The out-of-scope question is correctly escalated instead of answered — that's the whole point of
+      the design.</p>
+    </div>
+
+    <div class="case-block">
+      <h2>Documentation</h2>
+      <p>The production evolution table above is the documentation a Project Leader would need to approve
+      moving this from prototype to a real integration.</p>
+      <a class="link" href="https://github.com/apogeoconsara/PortafolioAI/tree/main/projects/02-agente-ia-soporte-tecnico" target="_blank" rel="noopener">View the source code on GitHub →</a>
+    </div>
+
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <p>© 2026 Sarahí Cruz Salazar · <a class="link" href="index.html">Back to the AI Implementation Console</a></p>
+  </div>
+</footer>
+
+</body>
+</html>

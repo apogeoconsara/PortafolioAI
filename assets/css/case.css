@@ -1,0 +1,97 @@
+.case-hero {
+  padding: 56px 0 40px;
+  background: linear-gradient(180deg, var(--accent-soft) 0%, var(--bg) 100%);
+  border-bottom: 1px solid var(--border);
+}
+
+.case-eyebrow {
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.78rem;
+  font-weight: 700;
+  margin: 0 0 12px;
+}
+
+.case-hero h1 {
+  font-size: clamp(1.6rem, 3.4vw, 2.2rem);
+  margin: 0 0 14px;
+  color: var(--text);
+}
+
+.case-hero .lead {
+  max-width: 680px;
+  color: var(--text-muted);
+  font-size: 1.02rem;
+  margin: 0 0 18px;
+}
+
+.case-tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.case-body {
+  max-width: 760px;
+}
+
+.case-block {
+  padding: 28px 0;
+  border-top: 1px solid var(--border);
+}
+
+.case-block:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+
+.case-block h2 {
+  font-size: 1.1rem;
+  color: var(--text);
+  margin: 0 0 12px;
+}
+
+.case-block p {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.case-block ul, .case-block ol {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  padding-left: 20px;
+}
+
+.case-block li {
+  margin-bottom: 6px;
+}
+
+.case-pre {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px;
+  overflow-x: auto;
+  font-size: 0.78rem;
+  color: var(--text);
+  white-space: pre;
+}
+
+.case-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  margin-top: 8px;
+}
+
+.case-table th, .case-table td {
+  border: 1px solid var(--border);
+  padding: 8px 10px;
+  text-align: left;
+}
+
+.case-table th {
+  background: var(--bg);
+  color: var(--text);
+}
