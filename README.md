@@ -1,36 +1,53 @@
-# AI Implementation Console — Sarahí Cruz Salazar
+# AI Implementation Assistant — Sarahí Cruz Salazar
 
-Built for the **AI Implementation Specialist** role at **Alten México**. This is not a static resume site: the
-homepage IS a working 4-agent AI implementation pipeline (Netlify Functions calling Claude live), followed by
-the methodology, an interactive map of where AI fits an engineering workflow, and proof-of-execution code.
+Built for the **AI Implementation Specialist** role at **Alten México**. One project, one page: a single
+assistant with seven selectable objectives, each routing to the right combination of specialized agents. EN
+by default, ES available via the toggle in the header — the toggle itself doubles as evidence of the
+technical English the role asks for.
 
-## The console (`index.html`)
+## The assistant (`index.html`)
 
-Describe a real engineering workflow and watch four chained agents run against it:
+Pick a goal, describe your situation in your own words, and the assistant runs the right subset of a shared
+agent roster against it:
 
-**Audit → Prioritize → Design → Deliver**
-
-| Agent | Function | What it produces |
+| Goal | Steps used | Backend |
 |---|---|---|
-| Audit | `netlify/functions/audit.mts` | Current process, bottlenecks, repetitive work, dependencies, human decision points, risks, and scored automation opportunities |
-| Prioritize | `netlify/functions/prioritize.mts` | An impact × effort matrix (quick win / strategic / experiment / low priority) — never invents ROI or hours saved without baseline data |
-| Design | `netlify/functions/design-agent.mts` | An AI Solution Blueprint: approach, AI role vs. human role, integration point, success metrics, risks, implementation steps |
-| Deliver | `netlify/functions/report.mts` | An Implementation Brief (Executive Summary / Technical Approach / Adoption Plan / Metrics / Documentation), exportable as Markdown |
+| Audit a workflow | Auditor | `audit.mts` |
+| Find automation opportunities | Auditor → Prioritizer | `audit.mts`, `prioritize.mts` |
+| Design an AI agent | Solution Designer | `design-agent.mts` |
+| Improve a prompt | Prompt Engineer | `improve-prompt.mts` |
+| Optimize reporting/testing | Auditor → Prioritizer → Solution Designer | `audit.mts`, `prioritize.mts`, `design-agent.mts` |
+| Create implementation documentation | Documentation/Enablement | `document-solution.mts` |
+| Build a training plan | Documentation/Enablement | `training-plan.mts` |
 
-Each agent's structured JSON output feeds the next — this is a real chained pipeline, not four independent
-prompts. Deployed at `https://sarahiportafolioalten.netlify.app`. Requires `ANTHROPIC_API_KEY` set in Netlify
-(already configured for this project).
+The Solution Designer always renders a verdict first — `no_automation` / `prompt` /
+`deterministic_automation` / `rag_assistant` / `ai_agent` — before any solution detail. Not every workflow
+needs an agent, and the assistant says so.
 
-`motor-ia.html` is kept only as a redirect to `index.html#console` for the old link.
+All 7 functions accept a `language: "en"|"es"` field so the output matches whichever language is selected in
+the header, while structural fields (badges, quadrant keys) stay in English so the UI never breaks.
+
+Deployed at `https://sarahiportafolioalten.netlify.app`. Requires `ANTHROPIC_API_KEY` set in Netlify (already
+configured for this project). `motor-ia.html` is kept only as a redirect to `index.html#assistant` for the
+old link.
 
 ## Structure
 
 ```
-index.html                          The AI Implementation Console (homepage)
-netlify/functions/                  The 4 chained agents (Netlify Functions + Claude)
-  _lib/claude.mts                     Anthropic client + JSON/text response helpers
-assets/css/console.css              Console UI: pipeline, results panels, map, methodology
-assets/js/console.js                Pipeline orchestration + AI Implementation Map data
+index.html                          The AI Implementation Assistant (homepage)
+netlify/functions/
+  _lib/claude.mts                     Anthropic client + JSON/text helpers + language instruction
+  audit.mts                           Auditor
+  prioritize.mts                      Prioritizer
+  design-agent.mts                    Solution Designer (verdict + blueprint)
+  improve-prompt.mts                  Prompt Engineer
+  document-solution.mts               Documentation (freeform solution → brief)
+  training-plan.mts                   Documentation/Enablement (team → training plan)
+  report.mts                          Documentation (full-pipeline brief, used by the "optimize" flow)
+assets/css/console.css              UI: objective picker, pipeline, result panels, how-it-works, capabilities
+assets/js/console.js                Objective routing, i18n (EN/ES), orchestration
+case-audit-automation.html          Case study: Workflow Audit Framework (project 01)
+case-support-agent.html             Case study: Support Agent Prototype (project 02)
 projects/
   01-auditoria-automatizacion-flujos/     Audit checklist + opportunity-scoring script
   02-agente-ia-soporte-tecnico/           Support agent: classify → retrieve → escalate
@@ -39,9 +56,9 @@ projects/
   05-capacitacion-gestion-cambio/         Training plan + internal documentation template
 ```
 
-Each `projects/` folder has its own README with the problem it solves and how to run it. All code (`.py`,
-`.sql`) was executed and verified before publishing. The homepage's "Selected AI & Automation Work" section
-links directly to projects 01, 02 and 04 as proof of execution.
+`projects/` and the two case-study pages are kept as supporting evidence, linked discreetly from the
+homepage's "View additional work" link rather than presented as separate flagship projects — the whole page
+is built to demonstrate one thing well.
 
 ## Contact
 

@@ -1,5 +1,5 @@
 import type { Config } from "@netlify/functions";
-import { callAgentJSON, jsonResponse, errorResponse } from "./_lib/claude.mts";
+import { callAgentJSON, jsonResponse, errorResponse, languageInstruction, type Language } from "./_lib/claude.mts";
 
 /**
  * Agent 2 · Prioritizer
@@ -25,7 +25,10 @@ export default async (req: Request) => {
   }
 
   try {
-    const { opportunities } = (await req.json()) as { opportunities?: unknown };
+    const { opportunities, language } = (await req.json()) as {
+      opportunities?: unknown;
+      language?: Language;
+    };
     if (!Array.isArray(opportunities) || opportunities.length === 0) {
       return jsonResponse({ error: "An array of opportunities is required." }, 400);
     }
@@ -42,7 +45,7 @@ each opportunity. Classify each into a quadrant:
 - "experiment": low/medium business_impact, low implementation_effort
 - "low_priority": low business_impact, high implementation_effort
 Skip any opportunity whose recommended_intervention is "keep_human" — it
-does not belong in an implementation matrix.`,
+does not belong in an implementation matrix.${languageInstruction(language)}`,
       user: `Opportunities detected by the Audit agent (JSON):
 ${JSON.stringify(opportunities)}
 
@@ -60,11 +63,12 @@ this exact shape, ordered with the highest-priority quick wins first:
       maxTokens: 1500,
     });
 
-    return jsonResponse({
-      matrix,
-      data_note:
-        "Impact, effort and risk are qualitative judgments based on the description provided. Quantified ROI or hours-saved estimates require the project's actual baseline data.",
-    });
+    const data_note =
+      language === "es"
+        ? "Impacto, esfuerzo y riesgo son juicios cualitativos basados en la descripción proporcionada. Una estimación cuantificada de ROI u horas ahorradas requiere los datos base reales del proyecto."
+        : "Impact, effort and risk are qualitative judgments based on the description provided. Quantified ROI or hours-saved estimates require the project's actual baseline data.";
+
+    return jsonResponse({ matrix, data_note });
   } catch (err) {
     return errorResponse(err);
   }

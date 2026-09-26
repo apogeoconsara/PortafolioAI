@@ -1,5 +1,5 @@
 import type { Config } from "@netlify/functions";
-import { callAgentJSON, jsonResponse, errorResponse } from "./_lib/claude.mts";
+import { callAgentJSON, jsonResponse, errorResponse, languageInstruction, type Language } from "./_lib/claude.mts";
 
 /**
  * Agent 3 · AI Solution Designer
@@ -45,7 +45,10 @@ export default async (req: Request) => {
   }
 
   try {
-    const { opportunity } = (await req.json()) as { opportunity?: unknown };
+    const { opportunity, language } = (await req.json()) as {
+      opportunity?: unknown;
+      language?: Language;
+    };
     if (!opportunity) {
       return jsonResponse({ error: "An opportunity is required." }, 400);
     }
@@ -72,7 +75,7 @@ increasing complexity — choose the LOWEST one that solves the problem:
 
 Always keep a human_role that includes reviewing or approving the output —
 never propose removing human oversight entirely, even at the "ai_agent"
-level.`,
+level.${languageInstruction(language)}`,
       user: `Prioritized opportunity to solve (JSON):
 ${JSON.stringify(opportunity)}
 

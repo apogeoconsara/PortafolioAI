@@ -3,11 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sarahí Cruz Salazar · AI Implementation Console</title>
-<meta name="description" content="AI Implementation Console: audit an engineering workflow, prioritize the opportunity, design the AI solution and get an implementation brief — live, powered by Claude.">
+<title>AI Implementation Assistant · Sarahí Cruz Salazar</title>
+<meta name="description" content="One assistant, seven ways to implement AI in an engineering workflow — audit, prioritize, design, write prompts, document and train, live, powered by Claude.">
 <link rel="stylesheet" href="assets/css/style.css">
 <link rel="stylesheet" href="assets/css/console.css">
-<link rel="stylesheet" href="assets/css/case.css">
 </head>
 <body>
 
@@ -15,103 +14,98 @@
   <div class="container nav-inner">
     <span class="logo">Sarahí Cruz Salazar</span>
     <nav>
-      <a href="#console">Console</a>
-      <a href="#methodology">Methodology</a>
-      <a href="#work">Selected Work</a>
-      <a href="#enablement">Enablement</a>
-      <a href="#toolkit">Toolkit</a>
-      <a href="#contact">Contact</a>
+      <a href="#assistant" data-i18n="nav.assistant">Assistant</a>
+      <a href="#how" data-i18n="nav.how">How it works</a>
+      <a href="#capabilities" data-i18n="nav.capabilities">Capabilities</a>
+      <a href="#contact" data-i18n="nav.contact">Contact</a>
+      <span class="lang-toggle">
+        <button id="lang-en" class="lang-btn active" type="button">EN</button>
+        <span class="lang-sep">|</span>
+        <button id="lang-es" class="lang-btn" type="button">ES</button>
+      </span>
     </nav>
   </div>
 </header>
 
-<!-- ============ 1 & 2. HERO + LIVE CONSOLE ============ -->
-<section id="console" class="console-hero">
+<!-- ============ 1. HERO + ASSISTANT ============ -->
+<section id="assistant" class="console-hero">
   <div class="container">
-    <p class="role-line">AI Implementation &amp; Automation</p>
-    <h1>From engineering workflow to AI implementation.</h1>
-    <p class="lead">Audit the process. Identify the opportunity. Design the AI solution. Measure adoption.</p>
-    <p class="tags-line">Applied AI · AI Agents · Workflow Automation · Prompt Engineering · Analytics · AI Adoption</p>
+    <p class="role-line" data-i18n="hero.role">AI Implementation Assistant</p>
+    <h1 data-i18n="hero.h1">One assistant. Seven ways to implement AI in an engineering workflow.</h1>
+    <p class="lead" data-i18n="hero.lead">Pick a goal, describe your situation, and watch the right combination of agents run — live, on your own words.</p>
   </div>
 
   <div class="container">
     <div class="console-app">
 
+      <div class="objective-picker" id="objective-picker">
+        <button class="objective-chip active" data-objective="audit" type="button" data-i18n="obj.audit.label">Audit a workflow</button>
+        <button class="objective-chip" data-objective="opportunities" type="button" data-i18n="obj.opportunities.label">Find automation opportunities</button>
+        <button class="objective-chip" data-objective="design" type="button" data-i18n="obj.design.label">Design an AI agent</button>
+        <button class="objective-chip" data-objective="prompt" type="button" data-i18n="obj.prompt.label">Improve a prompt</button>
+        <button class="objective-chip" data-objective="optimize" type="button" data-i18n="obj.optimize.label">Optimize reporting/testing</button>
+        <button class="objective-chip" data-objective="docs" type="button" data-i18n="obj.docs.label">Create implementation documentation</button>
+        <button class="objective-chip" data-objective="training" type="button" data-i18n="obj.training.label">Build a training plan</button>
+      </div>
+
       <div class="console-input">
-        <label for="workflow-input" class="field-label">Describe an engineering workflow</label>
-        <textarea id="workflow-input" rows="4" placeholder="Each week, engineers manually consolidate testing results from multiple files, summarize failures and create a status report for the Project Leader."></textarea>
+        <label for="workflow-input" class="field-label" id="input-label" data-i18n="obj.audit.field">Describe an engineering workflow</label>
+        <textarea id="workflow-input" rows="4" data-i18n-placeholder="obj.audit.placeholder" placeholder="Each week, engineers manually consolidate testing results from multiple files, summarize failures and create a status report for the Project Leader."></textarea>
         <div class="cta-row">
-          <button id="btn-run" class="btn btn-primary" type="button">Analyze workflow</button>
-          <button id="btn-example" class="btn btn-outline" type="button">Try an engineering example</button>
+          <button id="btn-run" class="btn btn-primary" type="button" data-i18n="obj.audit.run">Analyze workflow</button>
+          <button id="btn-example" class="btn btn-outline" type="button" data-i18n="common.tryExample">Try an example</button>
         </div>
         <p id="error-msg" class="error-msg" hidden></p>
       </div>
 
-      <div class="pipeline" id="pipeline">
-        <div class="pipeline-stage" data-stage="audit">
-          <span class="pipeline-num">01</span>
-          <span class="pipeline-name">AUDIT</span>
-          <span class="pipeline-desc">Process understanding</span>
-        </div>
-        <div class="pipeline-arrow">→</div>
-        <div class="pipeline-stage" data-stage="prioritize">
-          <span class="pipeline-num">02</span>
-          <span class="pipeline-name">PRIORITIZE</span>
-          <span class="pipeline-desc">Impact × effort</span>
-        </div>
-        <div class="pipeline-arrow">→</div>
-        <div class="pipeline-stage" data-stage="design">
-          <span class="pipeline-num">03</span>
-          <span class="pipeline-name">DESIGN</span>
-          <span class="pipeline-desc">AI solution architecture</span>
-        </div>
-        <div class="pipeline-arrow">→</div>
-        <div class="pipeline-stage" data-stage="report">
-          <span class="pipeline-num">04</span>
-          <span class="pipeline-name">DELIVER</span>
-          <span class="pipeline-desc">Implementation brief</span>
-        </div>
-      </div>
+      <div class="pipeline" id="pipeline"></div>
 
       <div class="console-log" id="console-log" aria-live="polite"></div>
 
-      <!-- ===== 3. AUDIT RESULT ===== -->
+      <!-- ===== AUDIT RESULT ===== -->
       <div class="result-panel" id="panel-audit" hidden>
-        <h3>Workflow Audit</h3>
+        <h3 data-i18n="panel.audit.title">Workflow Audit</h3>
         <p class="panel-lede" data-field="current_process"></p>
         <div class="audit-grid">
-          <div><h4>Bottlenecks</h4><ul data-field="bottlenecks"></ul></div>
-          <div><h4>Repetitive work</h4><ul data-field="repetitive_work"></ul></div>
-          <div><h4>Information dependencies</h4><ul data-field="information_dependencies"></ul></div>
-          <div><h4>Human decision points</h4><ul data-field="human_decision_points"></ul></div>
-          <div><h4>Potential risks</h4><ul data-field="potential_risks"></ul></div>
+          <div><h4 data-i18n="panel.audit.bottlenecks">Bottlenecks</h4><ul data-field="bottlenecks"></ul></div>
+          <div><h4 data-i18n="panel.audit.repetitive">Repetitive work</h4><ul data-field="repetitive_work"></ul></div>
+          <div><h4 data-i18n="panel.audit.dependencies">Information dependencies</h4><ul data-field="information_dependencies"></ul></div>
+          <div><h4 data-i18n="panel.audit.decisions">Human decision points</h4><ul data-field="human_decision_points"></ul></div>
+          <div><h4 data-i18n="panel.audit.risks">Potential risks</h4><ul data-field="potential_risks"></ul></div>
         </div>
-        <h4 class="opportunities-title">Automation opportunities</h4>
+        <h4 class="opportunities-title" data-i18n="panel.audit.opportunities">Automation opportunities</h4>
         <div class="opportunity-list" data-field="opportunities"></div>
       </div>
 
-      <!-- ===== 4. PRIORITIZATION ===== -->
+      <!-- ===== PRIORITIZATION ===== -->
       <div class="result-panel" id="panel-prioritize" hidden>
-        <h3>Opportunity Prioritization</h3>
+        <h3 data-i18n="panel.prioritize.title">Opportunity Prioritization</h3>
         <p class="data-note" data-field="data_note"></p>
         <div class="quadrant" id="quadrant">
-          <div class="quadrant-cell" data-quadrant="quick_win"><span class="quadrant-label">Quick win</span><div class="quadrant-items"></div></div>
-          <div class="quadrant-cell" data-quadrant="strategic"><span class="quadrant-label">Strategic</span><div class="quadrant-items"></div></div>
-          <div class="quadrant-cell" data-quadrant="experiment"><span class="quadrant-label">Experiment</span><div class="quadrant-items"></div></div>
-          <div class="quadrant-cell" data-quadrant="low_priority"><span class="quadrant-label">Low priority</span><div class="quadrant-items"></div></div>
+          <div class="quadrant-cell" data-quadrant="quick_win"><span class="quadrant-label" data-i18n="panel.prioritize.quickWin">Quick win</span><div class="quadrant-items"></div></div>
+          <div class="quadrant-cell" data-quadrant="strategic"><span class="quadrant-label" data-i18n="panel.prioritize.strategic">Strategic</span><div class="quadrant-items"></div></div>
+          <div class="quadrant-cell" data-quadrant="experiment"><span class="quadrant-label" data-i18n="panel.prioritize.experiment">Experiment</span><div class="quadrant-items"></div></div>
+          <div class="quadrant-cell" data-quadrant="low_priority"><span class="quadrant-label" data-i18n="panel.prioritize.lowPriority">Low priority</span><div class="quadrant-items"></div></div>
         </div>
         <div class="table-wrap">
           <table id="matrix-table">
-            <thead><tr><th>Opportunity</th><th>Business impact</th><th>Implementation effort</th><th>Frequency</th><th>Risk</th><th>Priority</th></tr></thead>
+            <thead><tr>
+              <th data-i18n="panel.prioritize.col.opportunity">Opportunity</th>
+              <th data-i18n="panel.prioritize.col.impact">Business impact</th>
+              <th data-i18n="panel.prioritize.col.effort">Implementation effort</th>
+              <th data-i18n="panel.prioritize.col.frequency">Frequency</th>
+              <th data-i18n="panel.prioritize.col.risk">Risk</th>
+              <th data-i18n="panel.prioritize.col.priority">Priority</th>
+            </tr></thead>
             <tbody data-field="matrix-rows"></tbody>
           </table>
         </div>
       </div>
 
-      <!-- ===== 5. AI SOLUTION BLUEPRINT ===== -->
+      <!-- ===== AI SOLUTION BLUEPRINT ===== -->
       <div class="result-panel" id="panel-design" hidden>
-        <h3>AI Solution Blueprint</h3>
-        <p class="verdict-tagline">Not every workflow needs an AI agent.</p>
+        <h3 data-i18n="panel.design.title">AI Solution Blueprint</h3>
+        <p class="verdict-tagline" data-i18n="panel.design.tagline">Not every workflow needs an AI agent.</p>
         <div class="verdict-box">
           <span class="verdict-badge" data-field="implementation_verdict"></span>
           <p class="verdict-reason" data-field="verdict_reason"></p>
@@ -120,42 +114,73 @@
         <span class="approach-badge" data-field="recommended_approach"></span>
 
         <div class="blueprint-diagram">
-          <div class="diagram-node">Engineering Workflow</div>
+          <div class="diagram-node" data-i18n="panel.design.diagram.workflow">Engineering Workflow</div>
           <div class="diagram-arrow">↓</div>
-          <div class="diagram-node">Input / Data</div>
+          <div class="diagram-node" data-i18n="panel.design.diagram.input">Input / Data</div>
           <div class="diagram-arrow">↓</div>
-          <div class="diagram-node diagram-node-ai">AI Layer</div>
+          <div class="diagram-node diagram-node-ai" data-i18n="panel.design.diagram.ai">AI Layer</div>
           <div class="diagram-arrow">↓</div>
-          <div class="diagram-node">Validation / Human-in-the-loop</div>
+          <div class="diagram-node" data-i18n="panel.design.diagram.validation">Validation / Human-in-the-loop</div>
           <div class="diagram-arrow">↓</div>
-          <div class="diagram-node">Engineering Output</div>
+          <div class="diagram-node" data-i18n="panel.design.diagram.output">Engineering Output</div>
           <div class="diagram-arrow">↓</div>
-          <div class="diagram-node">Metrics</div>
+          <div class="diagram-node" data-i18n="panel.design.diagram.metrics">Metrics</div>
         </div>
 
         <div class="blueprint-grid">
-          <div><h4>Inputs</h4><ul data-field="inputs"></ul></div>
-          <div><h4>AI role</h4><p data-field="ai_role"></p></div>
-          <div><h4>Human role</h4><p data-field="human_role"></p></div>
-          <div><h4>Output</h4><p data-field="output"></p></div>
-          <div><h4>Integration point</h4><p data-field="integration_point"></p></div>
-          <div><h4>Success metrics</h4><ul data-field="success_metrics"></ul></div>
-          <div><h4>Risks</h4><ul data-field="risks"></ul></div>
-          <div><h4>Implementation steps</h4><ol data-field="implementation_steps"></ol></div>
+          <div><h4 data-i18n="panel.design.inputs">Inputs</h4><ul data-field="inputs"></ul></div>
+          <div><h4 data-i18n="panel.design.aiRole">AI role</h4><p data-field="ai_role"></p></div>
+          <div><h4 data-i18n="panel.design.humanRole">Human role</h4><p data-field="human_role"></p></div>
+          <div><h4 data-i18n="panel.design.output">Output</h4><p data-field="output"></p></div>
+          <div><h4 data-i18n="panel.design.integration">Integration point</h4><p data-field="integration_point"></p></div>
+          <div><h4 data-i18n="panel.design.metrics">Success metrics</h4><ul data-field="success_metrics"></ul></div>
+          <div><h4 data-i18n="panel.design.risks">Risks</h4><ul data-field="risks"></ul></div>
+          <div><h4 data-i18n="panel.design.steps">Implementation steps</h4><ol data-field="implementation_steps"></ol></div>
         </div>
       </div>
 
-      <!-- ===== 6. IMPLEMENTATION BRIEF ===== -->
+      <!-- ===== IMPROVE A PROMPT ===== -->
+      <div class="result-panel" id="panel-prompt" hidden>
+        <h3 data-i18n="panel.prompt.title">Prompt Improvement</h3>
+        <h4 data-i18n="panel.prompt.improved">Improved prompt</h4>
+        <pre class="prompt-pre" data-field="improved_prompt"></pre>
+        <div class="blueprint-grid">
+          <div><h4 data-i18n="panel.prompt.techniques">Techniques applied</h4><ul data-field="techniques_applied"></ul></div>
+          <div><h4 data-i18n="panel.prompt.rationale">Rationale</h4><p data-field="rationale"></p></div>
+          <div><h4 data-i18n="panel.prompt.impact">Estimated impact</h4><p data-field="estimated_impact"></p></div>
+        </div>
+      </div>
+
+      <!-- ===== TRAINING PLAN ===== -->
+      <div class="result-panel" id="panel-training" hidden>
+        <h3 data-field="program_title"></h3>
+        <div class="table-wrap">
+          <table id="training-table">
+            <thead><tr>
+              <th data-i18n="panel.training.col.session">Session</th>
+              <th data-i18n="panel.training.col.objective">Objective</th>
+              <th data-i18n="panel.training.col.activity">Activity</th>
+              <th data-i18n="panel.training.col.deliverable">Deliverable</th>
+            </tr></thead>
+            <tbody data-field="sessions-rows"></tbody>
+          </table>
+        </div>
+        <h4 data-i18n="panel.training.notes">Enablement &amp; measurement</h4>
+        <p data-field="enablement_notes"></p>
+        <button id="btn-download-training" class="btn btn-outline btn-sm" type="button" data-i18n="panel.training.download">Download training plan</button>
+      </div>
+
+      <!-- ===== IMPLEMENTATION BRIEF (docs objective) ===== -->
       <div class="result-panel" id="panel-report" hidden>
         <div class="brief-header">
-          <h3>Implementation Brief</h3>
+          <h3 data-i18n="panel.report.title">Implementation Brief</h3>
         </div>
         <div class="brief-tabs" id="brief-tabs">
-          <button class="tab-btn active" data-brief-tab="executive_summary" type="button">Executive Summary</button>
-          <button class="tab-btn" data-brief-tab="technical_approach" type="button">Technical Approach</button>
-          <button class="tab-btn" data-brief-tab="adoption_plan" type="button">Adoption Plan</button>
-          <button class="tab-btn" data-brief-tab="metrics" type="button">Metrics</button>
-          <button class="tab-btn" data-brief-tab="documentation" type="button">Documentation</button>
+          <button class="tab-btn active" data-brief-tab="executive_summary" type="button" data-i18n="panel.report.tab.summary">Executive Summary</button>
+          <button class="tab-btn" data-brief-tab="technical_approach" type="button" data-i18n="panel.report.tab.approach">Technical Approach</button>
+          <button class="tab-btn" data-brief-tab="adoption_plan" type="button" data-i18n="panel.report.tab.adoption">Adoption Plan</button>
+          <button class="tab-btn" data-brief-tab="metrics" type="button" data-i18n="panel.report.tab.metrics">Metrics</button>
+          <button class="tab-btn" data-brief-tab="documentation" type="button" data-i18n="panel.report.tab.docs">Documentation</button>
         </div>
         <div class="brief-panels">
           <p class="brief-panel active" data-brief-panel="executive_summary"></p>
@@ -166,16 +191,16 @@
         </div>
 
         <div class="export-block">
-          <h4>Export for implementation</h4>
-          <p class="export-hint">Generated preview — not a live Confluence/Jira integration, but the same handoff step a real implementation would need.</p>
+          <h4 data-i18n="panel.report.export">Export for implementation</h4>
+          <p class="export-hint" data-i18n="panel.report.exportHint">Generated preview — not a live Confluence/Jira integration, but the same handoff step a real implementation would need.</p>
           <div class="export-tabs" id="export-tabs">
-            <button class="tab-btn active" data-export="executive" type="button">Executive Brief</button>
-            <button class="tab-btn" data-export="confluence" type="button">Confluence Page</button>
-            <button class="tab-btn" data-export="jira" type="button">Jira Epic</button>
-            <button class="tab-btn" data-export="markdown" type="button">Markdown</button>
+            <button class="tab-btn active" data-export="executive" type="button" data-i18n="panel.report.export.executive">Executive Brief</button>
+            <button class="tab-btn" data-export="confluence" type="button" data-i18n="panel.report.export.confluence">Confluence Page</button>
+            <button class="tab-btn" data-export="jira" type="button" data-i18n="panel.report.export.jira">Jira Epic</button>
+            <button class="tab-btn" data-export="markdown" type="button" data-i18n="panel.report.export.markdown">Markdown</button>
           </div>
           <pre class="export-preview" id="export-preview"></pre>
-          <button id="btn-download" class="btn btn-outline btn-sm" type="button">Download this format</button>
+          <button id="btn-download" class="btn btn-outline btn-sm" type="button" data-i18n="panel.report.download">Download this format</button>
         </div>
       </div>
 
@@ -183,159 +208,70 @@
   </div>
 </section>
 
-<!-- ============ 7. METHODOLOGY ============ -->
-<section id="methodology" class="section">
+<!-- ============ 2. HOW IT WORKS ============ -->
+<section id="how" class="section alt">
   <div class="container">
-    <p class="section-kicker">AI implementation is not just building a model.</p>
-    <div class="method-grid">
-      <div class="method-step"><span class="method-num">01</span><h3>Audit</h3><p>Understand how the engineering team works today.</p></div>
-      <div class="method-step"><span class="method-num">02</span><h3>Prioritize</h3><p>Find where AI creates meaningful operational value.</p></div>
-      <div class="method-step"><span class="method-num">03</span><h3>Build</h3><p>Prototype the right intervention: prompt, automation, agent or assistant.</p></div>
-      <div class="method-step"><span class="method-num">04</span><h3>Integrate</h3><p>Connect the solution to the existing workflow.</p></div>
-      <div class="method-step"><span class="method-num">05</span><h3>Measure</h3><p>Track adoption, quality and operational impact.</p></div>
-      <div class="method-step"><span class="method-num">06</span><h3>Enable</h3><p>Document and train the team to operate independently.</p></div>
-      <div class="method-step"><span class="method-num">07</span><h3>Re-audit</h3><p>Find the next opportunity as the project evolves.</p></div>
+    <h2 data-i18n="how.title">How it works</h2>
+    <p class="section-intro" data-i18n="how.intro">One goal picker routes your input to the right combination of specialized steps — the same shared roster of agents, recombined differently for each objective.</p>
+    <div class="how-grid">
+      <div class="how-agent"><strong data-i18n="how.auditor.name">Auditor</strong><p data-i18n="how.auditor.desc">Understands the process before recommending anything.</p></div>
+      <div class="how-agent"><strong data-i18n="how.prioritizer.name">Prioritizer</strong><p data-i18n="how.prioritizer.desc">Scores impact vs. effort — no invented ROI.</p></div>
+      <div class="how-agent"><strong data-i18n="how.designer.name">Solution Designer</strong><p data-i18n="how.designer.desc">Picks the right intervention, including no automation at all.</p></div>
+      <div class="how-agent"><strong data-i18n="how.prompter.name">Prompt Engineer</strong><p data-i18n="how.prompter.desc">Rewrites a prompt with explicit technique, not guesswork.</p></div>
+      <div class="how-agent"><strong data-i18n="how.documenter.name">Documentation / Enablement</strong><p data-i18n="how.documenter.desc">Turns a decision into something a team can run without me.</p></div>
+    </div>
+    <div class="table-wrap">
+      <table id="how-table">
+        <thead><tr>
+          <th data-i18n="how.col.goal">Goal</th>
+          <th data-i18n="how.col.steps">Steps used</th>
+        </tr></thead>
+        <tbody>
+          <tr><td data-i18n="obj.audit.label">Audit a workflow</td><td data-i18n="how.auditor.name">Auditor</td></tr>
+          <tr><td data-i18n="obj.opportunities.label">Find automation opportunities</td><td><span data-i18n="how.auditor.name">Auditor</span> → <span data-i18n="how.prioritizer.name">Prioritizer</span></td></tr>
+          <tr><td data-i18n="obj.design.label">Design an AI agent</td><td data-i18n="how.designer.name">Solution Designer</td></tr>
+          <tr><td data-i18n="obj.prompt.label">Improve a prompt</td><td data-i18n="how.prompter.name">Prompt Engineer</td></tr>
+          <tr><td data-i18n="obj.optimize.label">Optimize reporting/testing</td><td><span data-i18n="how.auditor.name">Auditor</span> → <span data-i18n="how.prioritizer.name">Prioritizer</span> → <span data-i18n="how.designer.name">Solution Designer</span></td></tr>
+          <tr><td data-i18n="obj.docs.label">Create implementation documentation</td><td data-i18n="how.documenter.name">Documentation / Enablement</td></tr>
+          <tr><td data-i18n="obj.training.label">Build a training plan</td><td data-i18n="how.documenter.name">Documentation / Enablement</td></tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </section>
 
-<!-- ============ 8. SELECTED IMPLEMENTATIONS ============ -->
-<section id="work" class="section alt">
+<!-- ============ 3. WHAT THIS DEMONSTRATES ============ -->
+<section id="capabilities" class="section">
   <div class="container">
-    <h2>3 Selected Implementations</h2>
-    <p class="section-intro">Not slideware — a live system and two pieces of working code, each proof of a different part of the methodology above.</p>
-
-    <div class="work-grid">
-      <article class="work-card">
-        <span class="tag">Live · This page</span>
-        <h3>AI Adoption Engine</h3>
-        <p>The 4-agent console above, running against whatever workflow you just typed in. The clearest proof available: try it yourself before reading anyone's claims about it.</p>
-        <a class="link" href="#console">Run it again ↑</a>
-      </article>
-
-      <article class="work-card">
-        <span class="tag">Operational automation</span>
-        <h3>Workflow Audit Framework</h3>
-        <p>An audit checklist plus a scoring script that turns a team's task inventory into a ranked, inspectable automation backlog — the reasoning behind the Console's Audit/Prioritize stages, made explicit.</p>
-        <a class="link" href="case-audit-automation.html">Read the case study →</a>
-      </article>
-
-      <article class="work-card">
-        <span class="tag">Agent / workflow</span>
-        <h3>Support Agent Prototype</h3>
-        <p>A working agent that classifies, retrieves, and escalates to a human when confidence is low — escalation-by-design, the pattern that matters more than the model behind it.</p>
-        <a class="link" href="case-support-agent.html">Read the case study →</a>
-      </article>
+    <h2 data-i18n="cap.title">What this demonstrates</h2>
+    <p class="section-intro" data-i18n="cap.intro">Every result above is generated live by Claude when you run it — nothing on this page is pre-written.</p>
+    <div class="cap-grid">
+      <span class="cap-tag" data-i18n="cap.audit">Workflow auditing</span>
+      <span class="cap-tag" data-i18n="cap.llm">LLM integration</span>
+      <span class="cap-tag" data-i18n="cap.agents">AI agents &amp; chatbots</span>
+      <span class="cap-tag" data-i18n="cap.prompt">Prompt engineering</span>
+      <span class="cap-tag" data-i18n="cap.automation">Workflow automation</span>
+      <span class="cap-tag" data-i18n="cap.docs">Technical documentation</span>
+      <span class="cap-tag" data-i18n="cap.training">Training &amp; change management</span>
+      <span class="cap-tag" data-i18n="cap.analytics">Analytics &amp; measurement</span>
+      <span class="cap-tag" data-i18n="cap.judgment">Implementation judgment — knowing when not to use AI</span>
     </div>
   </div>
 </section>
 
-<!-- ============ 9. AI ENABLEMENT & DOCUMENTATION ============ -->
-<section id="enablement" class="section">
-  <div class="container">
-    <h2>AI Enablement &amp; Documentation</h2>
-    <p class="section-intro">Alten weighs this heavily, for good reason: a solution nobody was trained to run doesn't get adopted.</p>
-
-    <div class="enablement-card">
-      <h3>AI Enablement Kit</h3>
-      <ul class="enablement-list">
-        <li>Prompt Engineering Playbook</li>
-        <li>Building Your First Agent</li>
-        <li>AI Usage Guidelines</li>
-        <li>Workshop Structure</li>
-        <li>Adoption Measurement</li>
-      </ul>
-      <button id="btn-preview-kit" class="btn btn-primary btn-sm" type="button">Preview training kit</button>
-    </div>
-  </div>
-</section>
-
-<!-- Enablement kit modal -->
-<div class="modal-overlay" id="kit-modal" hidden>
-  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="kit-modal-title">
-    <div class="modal-header">
-      <h3 id="kit-modal-title">AI Enablement Kit — Preview</h3>
-      <button id="btn-close-kit" class="modal-close" type="button" aria-label="Close">×</button>
-    </div>
-    <div class="modal-body">
-      <section class="kit-section">
-        <h4>Prompt Engineering Playbook</h4>
-        <p>5 before/after prompts for common engineering tasks (test case generation, status summaries, design review), each with the structure that made it better: role, format, explicit constraints — plus a script that estimates the token/response savings.</p>
-      </section>
-      <section class="kit-section">
-        <h4>Building Your First Agent</h4>
-        <p>Session 3 of the 4-part program: pairs build a minimal classify → retrieve → escalate prototype for one of their own tasks, using the same pattern as the Support Agent case study, and demo it in 5 minutes.</p>
-      </section>
-      <section class="kit-section">
-        <h4>AI Usage Guidelines</h4>
-        <p>What stays human-led, what data should never go into a prompt, and when to escalate instead of trust a confident-sounding answer — the non-negotiables from the Support Agent's design carried into a written policy.</p>
-      </section>
-      <section class="kit-section">
-        <h4>Workshop Structure</h4>
-        <p>4 sessions × 1.5 hours: Fundamentals &amp; use-case spotting → Prompt engineering &amp; token optimization → Build your first agent → Measurement, governance and documentation. Every session ends with a participant-made deliverable, not just slides.</p>
-      </section>
-      <section class="kit-section">
-        <h4>Adoption Measurement</h4>
-        <p>A re-audit at 4 weeks using the same audit checklist, plus a lightweight internal-doc template (Confluence/SharePoint-ready) so every new tool ships with an owner, a "what NOT to use this for," and a measured before/after.</p>
-      </section>
-      <a class="link" href="https://github.com/apogeoconsara/PortafolioAI/tree/main/projects/05-capacitacion-gestion-cambio" target="_blank" rel="noopener">View the full training plan on GitHub →</a>
-    </div>
-  </div>
-</div>
-
-<!-- ============ 10. TECHNICAL TOOLKIT ============ -->
-<section id="toolkit" class="section alt">
-  <div class="container">
-    <h2>Technical Toolkit</h2>
-    <p class="section-intro">Deliberately split in two — what I've actually built with, versus what the same principles transfer to.</p>
-    <div class="toolkit-grid">
-      <div class="toolkit-col">
-        <h3><span class="badge badge-high">Hands-on</span></h3>
-        <ul>
-          <li>Claude / Anthropic API — structured JSON outputs, chained multi-step pipelines</li>
-          <li>Python — scoring scripts, rule-based agents</li>
-          <li>SQL — data modeling for adoption metrics</li>
-          <li>JavaScript, serverless functions (Netlify)</li>
-          <li>Prompt engineering &amp; schema design</li>
-          <li>Git / GitHub</li>
-        </ul>
-      </div>
-      <div class="toolkit-col">
-        <h3><span class="badge badge-medium">Adaptable to enterprise environments</span></h3>
-        <ul>
-          <li>Mistral, Copilot, Glean — same LLM-integration architecture as above, different vendor</li>
-          <li>Jira, Confluence, NetSuite — same documentation/handoff pattern shown in the Implementation Brief</li>
-          <li>Power BI — same data-modeling principles proven in the SQL adoption model</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============ 11. ROLE ALIGNMENT ============ -->
-<section id="alignment" class="section">
-  <div class="container">
-    <h2>What this demonstrates</h2>
-    <div class="alignment-grid">
-      <div class="alignment-item"><strong>Reading a process before recommending anything.</strong><p>The Console's Audit stage — and the Workflow Audit Framework case study built the same way.</p></div>
-      <div class="alignment-item"><strong>Prioritizing with judgment, not hype.</strong><p>The Prioritize stage never invents ROI or hours saved without baseline data.</p></div>
-      <div class="alignment-item"><strong>Choosing the right intervention — including none.</strong><p>The Design stage's verdict system, and the Support Agent's escalate-instead-of-guess default.</p></div>
-      <div class="alignment-item"><strong>Handing off something a team can run without me.</strong><p>The Implementation Brief, its Confluence/Jira export formats, and the Enablement Kit.</p></div>
-    </div>
-  </div>
-</section>
-
+<!-- ============ 4. PROFILE & CONTACT ============ -->
 <section id="contact" class="section alt">
   <div class="container">
-    <h2>Contact</h2>
-    <p>Available to discuss the AI Implementation Specialist role at Alten México.</p>
+    <h2 data-i18n="contact.title">Contact</h2>
+    <p data-i18n="contact.line">Available to discuss the AI Implementation Specialist role at Alten México.</p>
     <p class="contact-email">sarahicruzsalazar@gmail.com</p>
+    <a class="link additional-work" href="https://github.com/apogeoconsara/PortafolioAI" target="_blank" rel="noopener" data-i18n="contact.additional">View additional work →</a>
   </div>
 </section>
 
 <footer class="footer">
   <div class="container">
-    <p>© 2026 Sarahí Cruz Salazar · Console built with Netlify Functions + Claude (Anthropic)</p>
+    <p>© 2026 Sarahí Cruz Salazar · <span data-i18n="footer.built">Built with Netlify Functions + Claude (Anthropic)</span></p>
   </div>
 </footer>
 

@@ -1,5 +1,5 @@
 import type { Config } from "@netlify/functions";
-import { callAgentJSON, jsonResponse, errorResponse } from "./_lib/claude.mts";
+import { callAgentJSON, jsonResponse, errorResponse, languageInstruction, type Language } from "./_lib/claude.mts";
 
 /**
  * Agent 4 · Implementation Brief
@@ -22,11 +22,12 @@ export default async (req: Request) => {
   }
 
   try {
-    const { process: workflow, audit, opportunity, blueprint } = (await req.json()) as {
+    const { process: workflow, audit, opportunity, blueprint, language } = (await req.json()) as {
       process?: string;
       audit?: unknown;
       opportunity?: unknown;
       blueprint?: unknown;
+      language?: Language;
     };
     if (!workflow || !audit || !opportunity || !blueprint) {
       return jsonResponse(
@@ -41,7 +42,7 @@ implementation brief for a Project Leader, in the tone of a document that
 will actually be pasted into Confluence or SharePoint. Be concrete and
 concise. Never invent numeric ROI or hours-saved figures that were not
 established earlier in the pipeline — if none were given, say metrics will
-be tracked from a baseline once implemented.`,
+be tracked from a baseline once implemented.${languageInstruction(language)}`,
       user: `Data to compile:
 
 Original workflow description:

@@ -1,5 +1,5 @@
 import type { Config } from "@netlify/functions";
-import { callAgentJSON, jsonResponse, errorResponse } from "./_lib/claude.mts";
+import { callAgentJSON, jsonResponse, errorResponse, languageInstruction, type Language } from "./_lib/claude.mts";
 
 /**
  * Agent 1 · Auditor
@@ -40,7 +40,11 @@ export default async (req: Request) => {
   }
 
   try {
-    const { process: workflow } = (await req.json()) as { process?: string };
+    const { process: workflow, focus, language } = (await req.json()) as {
+      process?: string;
+      focus?: string;
+      language?: Language;
+    };
     if (!workflow || workflow.trim().length < 20) {
       return jsonResponse(
         { error: "Describe the workflow with at least 20 characters." },
@@ -55,7 +59,7 @@ works TODAY before recommending anything. Never assume AI is the answer.
 Be concrete and grounded strictly in what the user described — do not
 invent details, tools, or team structure they did not mention. If the
 description is vague about frequency or volume, say so instead of guessing
-a number.`,
+a number.${focus ? ` Focus the audit specifically on ${focus}.` : ""}${languageInstruction(language)}`,
       user: `Engineering workflow described by the user:
 """
 ${workflow}
