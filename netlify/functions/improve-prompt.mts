@@ -1,5 +1,5 @@
 import type { Config } from "@netlify/functions";
-import { callAgentJSON, jsonResponse, errorResponse, languageInstruction, type Language } from "./_lib/claude.mts";
+import { callAgentJSONMeta, jsonResponse, errorResponse, languageInstruction, type Language } from "./_lib/claude.mts";
 
 /**
  * Objective: "Improve a prompt"
@@ -27,7 +27,7 @@ export default async (req: Request) => {
       return jsonResponse({ error: "Paste a prompt with at least 10 characters." }, 400);
     }
 
-    const result = await callAgentJSON<PromptImprovement>({
+    const { data: result, meta } = await callAgentJSONMeta<PromptImprovement>({
       system: `You are a prompt engineering specialist. Given a prompt someone
 already uses, rewrite it to be more reliable and predictable, applying
 concrete techniques: an explicit role, a defined output format, length or
@@ -51,7 +51,7 @@ Return a single JSON object with this exact shape:
       maxTokens: 1200,
     });
 
-    return jsonResponse({ result });
+    return jsonResponse({ result, meta });
   } catch (err) {
     return errorResponse(err);
   }
