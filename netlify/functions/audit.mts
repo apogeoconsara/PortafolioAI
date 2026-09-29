@@ -1,5 +1,5 @@
 import type { Config } from "@netlify/functions";
-import { callAgentJSON, jsonResponse, errorResponse, languageInstruction, type Language } from "./_lib/claude.mts";
+import { callAgentJSONMeta, jsonResponse, errorResponse, languageInstruction, type Language } from "./_lib/claude.mts";
 
 /**
  * Agent 1 · Auditor
@@ -24,7 +24,14 @@ interface Opportunity {
   rationale: string;
 }
 
+interface WorkflowStep {
+  label: string;
+  detail: string;
+  classification: "manual_repetitive" | "rules_based" | "ai_candidate" | "human_decision";
+}
+
 interface AuditResult {
+  workflow_steps?: WorkflowStep[];
   current_process: string;
   bottlenecks: string[];
   repetitive_work: string[];
@@ -40,9 +47,11 @@ export default async (req: Request) => {
   }
 
   try {
-    const { process: workflow, focus, language } = (await req.json()) as {
+    const { process: workflow, focus, language, xray } = (await req.json()) as {
       process?: string;
       focus?: string;
+      /** AI Workflow X-Ray mode: also return the step-by-step classification. */
+      xray?: boolean;
       language?: Language;
     };
     if (!workflow || workflow.trim().length < 20) {
@@ -52,7 +61,7 @@ export default async (req: Request) => {
       );
     }
 
-    const audit = await callAgentJSON<AuditResult>({
+    const { data: audit, meta } = await callAgentJSONMeta<AuditResult>({
       system: `You are a senior AI Implementation Specialist auditing a real
 engineering workflow. Your job is to understand how the process actually
 works TODAY before recommending anything. Never assume AI is the answer.
@@ -73,7 +82,14 @@ Return a single JSON object with this exact shape:
   "information_dependencies": string[] (1-3 items: sources of truth, handoffs, or systems this process depends on),
   "human_decision_points": string[] (1-3 items: where judgment must stay human even after automating),
   "potential_risks": string[] (1-3 items: what could go wrong if this is automated carelessly),
-  "opportunities": [
+${xray ? `  "workflow_steps": [
+    {
+      "label": string (1-2 words, the step as a node name, e.g. "Request", "Excel", "Jira"),
+      "detail": string (<=12 words, what happens in this step today),
+      "classification": "manual_repetitive"|"rules_based"|"ai_candidate"|"human_decision"
+    }
+  ] (5-8 items, in the order the work flows; classify each step honestly: "manual_repetitive" = copy/paste or re-keying a person does by hand, "rules_based" = deterministic logic a script or integration could do, "ai_candidate" = needs reading/understanding/generating unstructured content, "human_decision" = judgment or approval that must stay human),
+` : ""}  "opportunities": [
     {
       "opportunity": string,
       "automation_potential": "low"|"medium"|"high",
@@ -86,10 +102,10 @@ Return a single JSON object with this exact shape:
 Be honest: if something should stay human-led, use "keep_human" for it.
 Do not recommend an AI agent for everything — most real opportunities are a
 prompt, a simple automation, or a knowledge assistant.`,
-      maxTokens: 1400,
+      maxTokens: xray ? 2000 : 1400,
     });
 
-    return jsonResponse({ audit });
+    return jsonResponse({ audit, meta });
   } catch (err) {
     return errorResponse(err);
   }

@@ -1,5 +1,5 @@
 import type { Config } from "@netlify/functions";
-import { callAgentJSON, jsonResponse, errorResponse, languageInstruction, type Language } from "./_lib/claude.mts";
+import { callAgentJSONMeta, jsonResponse, errorResponse, languageInstruction, type Language } from "./_lib/claude.mts";
 
 /**
  * Agent 2 · Prioritizer
@@ -33,7 +33,7 @@ export default async (req: Request) => {
       return jsonResponse({ error: "An array of opportunities is required." }, 400);
     }
 
-    const matrix = await callAgentJSON<MatrixRow[]>({
+    const { data: matrix, meta } = await callAgentJSONMeta<MatrixRow[]>({
       system: `You are prioritizing AI implementation opportunities with the
 judgment of a real AI Implementation Specialist, not with hype. You do NOT
 have access to the project's actual metrics, so you must NEVER invent
@@ -68,7 +68,7 @@ this exact shape, ordered with the highest-priority quick wins first:
         ? "Impacto, esfuerzo y riesgo son juicios cualitativos basados en la descripción proporcionada. Una estimación cuantificada de ROI u horas ahorradas requiere los datos base reales del proyecto."
         : "Impact, effort and risk are qualitative judgments based on the description provided. Quantified ROI or hours-saved estimates require the project's actual baseline data.";
 
-    return jsonResponse({ matrix, data_note });
+    return jsonResponse({ matrix, data_note, meta });
   } catch (err) {
     return errorResponse(err);
   }

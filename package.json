@@ -2,9 +2,12 @@
   "name": "portafolio-ai-alten",
   "private": true,
   "version": "1.0.0",
-  "description": "Motor de agentes de IA para adopción en ingeniería - portafolio para Alten México",
+  "description": "Motor de agentes de IA para adopci\u00f3n en ingenier\u00eda - portafolio para Alten M\u00e9xico",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.32.1",
     "@netlify/functions": "^2.8.1"
+  },
+  "scripts": {
+    "dev": "node scripts/dev-server.mjs"
   }
 }

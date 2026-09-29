@@ -37,18 +37,39 @@ in English exactly as listed — only the free-text explanations, summaries
 and lists get translated to Spanish.`;
 }
 
+/** Real measurements from one Claude call (tokens as reported by the API). */
+export interface CallMeta {
+  model: string;
+  input_tokens: number;
+  output_tokens: number;
+  latency_ms: number;
+  stop_reason: string | null;
+}
+
+function toMeta(response: Anthropic.Message, startedAt: number): CallMeta {
+  return {
+    model: response.model,
+    input_tokens: response.usage.input_tokens,
+    output_tokens: response.usage.output_tokens,
+    latency_ms: Date.now() - startedAt,
+    stop_reason: response.stop_reason,
+  };
+}
+
 /**
  * Calls Claude asking for a response that is ONLY a JSON object/array, and
  * parses it. Each agent in the Implementation Assistant uses this to
  * produce structured output the next step (or the frontend) can consume
- * directly.
+ * directly. The `Meta` variant also returns the real token usage and
+ * latency of the call.
  */
-export async function callAgentJSON<T>(params: {
+export async function callAgentJSONMeta<T>(params: {
   system: string;
   user: string;
   maxTokens?: number;
-}): Promise<T> {
+}): Promise<{ data: T; meta: CallMeta }> {
   const anthropic = getClient();
+  const startedAt = Date.now();
   const response = await anthropic.messages.create({
     model: MODEL,
     max_tokens: params.maxTokens ?? 2000,
@@ -57,6 +78,7 @@ export async function callAgentJSON<T>(params: {
       "\n\nRespond with ONLY valid JSON, no text before or after, no markdown code fences.",
     messages: [{ role: "user", content: params.user }],
   });
+  const meta = toMeta(response, startedAt);
 
   const textBlock = response.content.find((block) => block.type === "text");
   const raw = textBlock && "text" in textBlock ? textBlock.text : "";
@@ -67,10 +89,39 @@ export async function callAgentJSON<T>(params: {
     .replace(/```\s*$/i, "");
 
   try {
-    return JSON.parse(cleaned) as T;
+    return { data: JSON.parse(cleaned) as T, meta };
   } catch (err) {
     throw new Error(`The agent did not return valid JSON. Raw response: ${raw.slice(0, 500)}`);
   }
+}
+
+export async function callAgentJSON<T>(params: {
+  system: string;
+  user: string;
+  maxTokens?: number;
+}): Promise<T> {
+  return (await callAgentJSONMeta<T>(params)).data;
+}
+
+/** Free-text call that also returns real usage/latency (used by the Optimization Lab). */
+export async function callAgentTextMeta(params: {
+  system?: string;
+  user: string;
+  maxTokens?: number;
+}): Promise<{ text: string; meta: CallMeta }> {
+  const anthropic = getClient();
+  const startedAt = Date.now();
+  const response = await anthropic.messages.create({
+    model: MODEL,
+    max_tokens: params.maxTokens ?? 2000,
+    ...(params.system ? { system: params.system } : {}),
+    messages: [{ role: "user", content: params.user }],
+  });
+  const textBlock = response.content.find((block) => block.type === "text");
+  return {
+    text: textBlock && "text" in textBlock ? textBlock.text : "",
+    meta: toMeta(response, startedAt),
+  };
 }
 
 /** Calls Claude asking for free text (used by text-based agents). */

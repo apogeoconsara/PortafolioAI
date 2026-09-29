@@ -1,11 +1,30 @@
-# AI Implementation Assistant — Sarahí Cruz Salazar
+# AI Workflow X-Ray — Sarahí Cruz Salazar
+
+**Homepage (`index.html`)** is now a single interactive experience: paste a workflow and the existing Claude
+pipeline (Auditor → Prioritizer → Solution Designer → Reporter) runs live, rendering a current-vs-proposed
+workflow X-ray, a live execution with a human approval gate, impact metrics, an optimization lab with
+measured tokens/latency, and a downloadable Implementation Pack.
+
+- `assets/js/xray.js`, `assets/css/xray.css` — the X-Ray UI.
+- New functions: `run-ecr.mts` (live execution against a synthetic ECR — Demo scenario) and `prompt-lab.mts`
+  (real token/latency measurement + blind LLM-judged evaluation; cost uses `PRICE_INPUT_PER_MTOK` /
+  `PRICE_OUTPUT_PER_MTOK` env vars, else an assumed $3/$15 per M tokens, labelled as an estimate).
+- `audit`, `design-agent`, `report` accept `xray: true` for extra fields; all agents now also return `meta`
+  (real usage/latency). Existing behavior is unchanged when the flag is omitted.
+- The previous 7-objective assistant lives on at `console.html` ("Explore technical implementation").
+- Local run: `npm install && ANTHROPIC_API_KEY=sk-... npm run dev` → http://localhost:8888
+  (or `netlify dev`).
+
+---
+
+# AI Implementation Assistant (now `console.html`)
 
 Built for the **AI Implementation Specialist** role at **Alten México**. One project, one page: a single
 assistant with seven selectable objectives, each routing to the right combination of specialized agents. EN
 by default, ES available via the toggle in the header — the toggle itself doubles as evidence of the
 technical English the role asks for.
 
-## The assistant (`index.html`)
+## The assistant (`console.html`)
 
 Pick a goal, describe your situation in your own words, and the assistant runs the right subset of a shared
 agent roster against it:
@@ -28,13 +47,14 @@ All 7 functions accept a `language: "en"|"es"` field so the output matches which
 the header, while structural fields (badges, quadrant keys) stay in English so the UI never breaks.
 
 Deployed at `https://sarahiportafolioalten.netlify.app`. Requires `ANTHROPIC_API_KEY` set in Netlify (already
-configured for this project). `motor-ia.html` is kept only as a redirect to `index.html#assistant` for the
+configured for this project). `motor-ia.html` is kept only as a redirect to `console.html#assistant` for the
 old link.
 
 ## Structure
 
 ```
-index.html                          The AI Implementation Assistant (homepage)
+index.html                          AI Workflow X-Ray (homepage)
+console.html                        The 7-objective AI Implementation Assistant
 netlify/functions/
   _lib/claude.mts                     Anthropic client + JSON/text helpers + language instruction
   audit.mts                           Auditor

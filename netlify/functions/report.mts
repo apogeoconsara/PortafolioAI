@@ -1,5 +1,5 @@
 import type { Config } from "@netlify/functions";
-import { callAgentJSON, jsonResponse, errorResponse, languageInstruction, type Language } from "./_lib/claude.mts";
+import { callAgentJSONMeta, jsonResponse, errorResponse, languageInstruction, type Language } from "./_lib/claude.mts";
 
 /**
  * Agent 4 · Implementation Brief
@@ -14,6 +14,8 @@ interface Brief {
   adoption_plan: string;
   metrics: string;
   documentation: string;
+  roadmap?: { phase: string; focus: string }[];
+  testing_plan?: string[];
 }
 
 export default async (req: Request) => {
@@ -22,7 +24,9 @@ export default async (req: Request) => {
   }
 
   try {
-    const { process: workflow, audit, opportunity, blueprint, language } = (await req.json()) as {
+    const { process: workflow, audit, opportunity, blueprint, language, xray } = (await req.json()) as {
+      /** AI Workflow X-Ray mode: also return a roadmap and a testing plan. */
+      xray?: boolean;
       process?: string;
       audit?: unknown;
       opportunity?: unknown;
@@ -36,7 +40,7 @@ export default async (req: Request) => {
       );
     }
 
-    const brief = await callAgentJSON<Brief>({
+    const { data: brief, meta } = await callAgentJSONMeta<Brief>({
       system: `You are an AI Implementation Specialist writing an
 implementation brief for a Project Leader, in the tone of a document that
 will actually be pasted into Confluence or SharePoint. Be concrete and
@@ -65,12 +69,14 @@ Return a single JSON object with this exact shape:
   "technical_approach": string (<=130 words: summarize the blueprint — approach, AI role, human role, integration point),
   "adoption_plan": string (<=130 words: concrete steps to train the team and get this adopted — reference documentation, a pilot, and re-auditing later),
   "metrics": string (<=80 words: how success will be tracked; state plainly that quantified targets require baseline data if none was given),
-  "documentation": string (<=100 words: what sections this should become in Confluence/SharePoint so another engineer could pick it up)
+  "documentation": string (<=100 words: what sections this should become in Confluence/SharePoint so another engineer could pick it up)${xray ? `,
+  "roadmap": [{ "phase": string (e.g. "Phase 1 · Pilot"), "focus": string (<=25 words: what gets built and validated, no dates or invented durations) }] (3-4 items),
+  "testing_plan": string[] (3-5 items, each <=25 words: how the solution is validated before rollout — e.g. shadow mode on past cases, human review sampling, failure-mode checks)` : ""}
 }`,
-      maxTokens: 1800,
+      maxTokens: xray ? 2600 : 1800,
     });
 
-    return jsonResponse({ brief });
+    return jsonResponse({ brief, meta });
   } catch (err) {
     return errorResponse(err);
   }
