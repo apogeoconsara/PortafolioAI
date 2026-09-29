@@ -12,6 +12,24 @@ function fillList(el, items) {
 }
 
 /* ============================================================
+   Sidebar navigation (single-screen view switching)
+   ============================================================ */
+
+const navlinks = $$(".navlink");
+const viewPanels = $$("[data-view-panel]");
+
+function showView(name) {
+  navlinks.forEach((btn) => btn.classList.toggle("active", btn.dataset.view === name));
+  viewPanels.forEach((panel) => {
+    panel.hidden = panel.dataset.viewPanel !== name;
+  });
+}
+
+navlinks.forEach((btn) => {
+  btn.addEventListener("click", () => showView(btn.dataset.view));
+});
+
+/* ============================================================
    i18n
    ============================================================ */
 
