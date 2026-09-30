@@ -10,6 +10,23 @@ const MODEL = "claude-sonnet-5";
  */
 const FAST_MODEL_DEFAULT = "claude-haiku-4-5-20251001";
 
+/** Calls the API; if the fast model is unavailable for this key, retries once on the default model. */
+async function createMessage(
+  params: Omit<Anthropic.MessageCreateParamsNonStreaming, "model">,
+  fast?: boolean
+): Promise<Anthropic.Message> {
+  const anthropic = getClient();
+  try {
+    return await anthropic.messages.create({ ...params, model: modelFor(fast) });
+  } catch (err) {
+    const status = (err as { status?: number }).status;
+    if (fast && (status === 404 || status === 400 || status === 403)) {
+      return await anthropic.messages.create({ ...params, model: MODEL });
+    }
+    throw err;
+  }
+}
+
 function modelFor(fast?: boolean): string {
   return fast ? Netlify.env.get("XRAY_MODEL") || FAST_MODEL_DEFAULT : MODEL;
 }
@@ -79,26 +96,28 @@ export async function callAgentJSONMeta<T>(params: {
   maxTokens?: number;
   fast?: boolean;
 }): Promise<{ data: T; meta: CallMeta }> {
-  const anthropic = getClient();
   const startedAt = Date.now();
-  const response = await anthropic.messages.create({
-    model: modelFor(params.fast),
-    max_tokens: params.maxTokens ?? 2000,
-    system:
-      params.system +
-      "\n\nRespond with ONLY valid JSON, no text before or after, no markdown code fences.",
-    messages: [{ role: "user", content: params.user }],
-  });
+  const response = await createMessage(
+    {
+      max_tokens: params.maxTokens ?? 2000,
+      system:
+        params.system +
+        "\n\nRespond with ONLY valid JSON, no text before or after, no markdown code fences.",
+      messages: [{ role: "user", content: params.user }],
+    },
+    params.fast
+  );
   const meta = toMeta(response, startedAt);
 
-  const textBlock = response.content.find((block) => block.type === "text");
-  const raw = textBlock && "text" in textBlock ? textBlock.text : "";
+  const raw = response.content.map((b) => (b.type === "text" ? b.text : "")).join("");
   const data = parseJSONLoose<T>(raw);
   if (data === undefined) {
     const why =
       response.stop_reason === "max_tokens"
         ? "The agent's response was cut off before the JSON was complete."
-        : "The agent did not return valid JSON.";
+        : raw.trim() === ""
+          ? "The agent returned an empty response."
+          : "The agent did not return valid JSON.";
     throw new Error(`${why} Raw response: ${raw.slice(0, 300)}`);
   }
   return { data, meta };
@@ -143,14 +162,15 @@ export async function callAgentTextMeta(params: {
   maxTokens?: number;
   fast?: boolean;
 }): Promise<{ text: string; meta: CallMeta }> {
-  const anthropic = getClient();
   const startedAt = Date.now();
-  const response = await anthropic.messages.create({
-    model: modelFor(params.fast),
-    max_tokens: params.maxTokens ?? 2000,
-    ...(params.system ? { system: params.system } : {}),
-    messages: [{ role: "user", content: params.user }],
-  });
+  const response = await createMessage(
+    {
+      max_tokens: params.maxTokens ?? 2000,
+      ...(params.system ? { system: params.system } : {}),
+      messages: [{ role: "user", content: params.user }],
+    },
+    params.fast
+  );
   const textBlock = response.content.find((block) => block.type === "text");
   return {
     text: textBlock && "text" in textBlock ? textBlock.text : "",
