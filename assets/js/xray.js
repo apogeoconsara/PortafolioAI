@@ -9,7 +9,7 @@
     en: {
       example: "Engineering Change Request: requests arrive by email, data is copied to Excel, an engineer validates requirements, creates a Jira ticket, searches documentation, requests manager approval and manually prepares a status report.",
       baseline: "Look at this process and tell me where we could use AI.",
-      brandBy: "Sarahí Cruz Salazar · AI Implementation",
+      brandBy: "Sarahí Cruz Salazar — AI Implementation Specialist candidate · ALTEN México",
       tech: "Explore technical implementation",
       h1: "Give me a workflow.<br><span>I'll show you where AI belongs.</span>",
       sub: "Audit the process. Design the automation. Keep humans in control. Measure the result.",
@@ -39,6 +39,16 @@
       p_roadmap: "Implementation Roadmap", p_testing: "Testing Plan", p_training: "Documentation / Training Plan",
       footer: "Built with Netlify Functions + Claude (Anthropic). Example data is synthetic.",
       drawerTitle: "Implementation Pack",
+      contact: "Contact", code: "Code", exLabel: "Try an example",
+      ex: [
+        { id: "ecr", label: "Engineering change", text: "Engineering Change Request: requests arrive by email, data is copied to Excel, an engineer validates requirements, creates a Jira ticket, searches documentation, requests manager approval and manually prepares a status report." },
+        { id: "tests", label: "Test reports", text: "Automotive test reporting: test benches export results to separate CSV files, an engineer merges them in Excel, reviews failures by hand, and writes a weekly test report for the project leader." },
+        { id: "reqs", label: "Requirements validation", text: "Aerospace requirements validation: customer requirements arrive as PDF and Word files, an engineer retypes them into a requirements tool, checks traceability and ambiguity by hand, and emails discrepancies for review before baselining." },
+      ],
+      timeout: "The request took too long (timeout).", whyTimeout: "timeout", whyError: "service error",
+      offlineNote: (why) => `Live run unavailable (${why}). Showing a saved demo run of the Engineering Change example — not a live result.`,
+      labOffline: "Not measured: this is a saved demo run.", evalUnavailable: " Evaluation unavailable this time.",
+      labDelta: (tok, cost) => `Optimized vs original: ${tok} tokens, ${cost} estimated cost.`,
       // dynamic
       err20: "Describe the workflow with at least 20 characters.", retry: "you can run it again.",
       steps: "steps", manualRep: "manual repetitive", bottlenecks: "bottlenecks",
@@ -68,7 +78,7 @@
     es: {
       example: "Solicitud de Cambio de Ingeniería (ECR): las solicitudes llegan por correo, los datos se copian a Excel, un ingeniero valida los requisitos, crea un ticket en Jira, busca en la documentación, pide aprobación al gerente y prepara a mano un reporte de estatus.",
       baseline: "Revisa este proceso y dime dónde podríamos usar IA.",
-      brandBy: "Sarahí Cruz Salazar · Implementación de IA",
+      brandBy: "Sarahí Cruz Salazar — candidata a AI Implementation Specialist · ALTEN México",
       tech: "Explorar la implementación técnica",
       h1: "Dame un workflow.<br><span>Te mostraré dónde debe entrar la IA.</span>",
       sub: "Audito el proceso. Diseño la automatización. Mantengo a las personas al control. Mido el resultado.",
@@ -98,6 +108,16 @@
       p_roadmap: "Roadmap de implementación", p_testing: "Plan de pruebas", p_training: "Plan de documentación / capacitación",
       footer: "Construido con Netlify Functions + Claude (Anthropic). Los datos de ejemplo son sintéticos.",
       drawerTitle: "Paquete de implementación",
+      contact: "Contacto", code: "Código", exLabel: "Prueba un ejemplo",
+      ex: [
+        { id: "ecr", label: "Cambio de ingeniería", text: "Solicitud de Cambio de Ingeniería (ECR): las solicitudes llegan por correo, los datos se copian a Excel, un ingeniero valida los requisitos, crea un ticket en Jira, busca en la documentación, pide aprobación al gerente y prepara a mano un reporte de estatus." },
+        { id: "tests", label: "Reportes de pruebas", text: "Reporte de pruebas automotriz: los bancos de prueba exportan resultados a archivos CSV separados, un ingeniero los une en Excel, revisa las fallas a mano y escribe un reporte semanal de pruebas para el líder de proyecto." },
+        { id: "reqs", label: "Validación de requisitos", text: "Validación de requisitos aeroespacial: los requisitos del cliente llegan en archivos PDF y Word, un ingeniero los recaptura en una herramienta de requisitos, revisa trazabilidad y ambigüedad a mano y envía por correo las discrepancias para revisión antes de fijar la línea base." },
+      ],
+      timeout: "La solicitud tardó demasiado (timeout).", whyTimeout: "timeout", whyError: "error del servicio",
+      offlineNote: (why) => `Ejecución en vivo no disponible (${why}). Se muestra una corrida demo guardada del ejemplo de Cambio de Ingeniería — no es un resultado en vivo.`,
+      labOffline: "Sin medir: es una corrida demo guardada.", evalUnavailable: " La evaluación no estuvo disponible esta vez.",
+      labDelta: (tok, cost) => `Optimizado vs original: ${tok} tokens, ${cost} de costo estimado.`,
       err20: "Describe el workflow con al menos 20 caracteres.", retry: "puedes ejecutarlo de nuevo.",
       steps: "pasos", manualRep: "manuales repetitivos", bottlenecks: "cuellos de botella",
       toAutomate: "a automatizar", quickWin: "victoria rápida", quickWins: "victorias rápidas", keptHuman: "se quedan humanos",
@@ -125,7 +145,10 @@
     },
   };
   let lang = "en";
-  try { lang = localStorage.getItem("xray-lang") === "es" ? "es" : "en"; } catch (e) { /* ignore */ }
+  try {
+    const stored = localStorage.getItem("xray-lang");
+    lang = stored ? (stored === "es" ? "es" : "en") : (navigator.language || "").toLowerCase().startsWith("es") ? "es" : "en";
+  } catch (e) { /* ignore */ }
   const t = (k) => I18N[lang][k];
 
 
@@ -137,10 +160,18 @@
   const input = $("#workflow-input");
   const btnRun = $("#btn-run");
   const errorBar = $("#error-bar");
-  input.value = t("example");
+  input.value = t("ex")[0].text;
 
-  const state = { runId: 0, data: {} };
-  const isExample = () => input.value.trim() === I18N.en.example || input.value.trim() === I18N.es.example;
+  const state = { runId: 0, data: {}, offline: false };
+  const exampleMatch = () => {
+    const v = input.value.trim();
+    for (const l of ["en", "es"]) {
+      const hit = I18N[l].ex.find((e) => e.text === v);
+      if (hit) return hit.id;
+    }
+    return null;
+  };
+  const isExample = () => exampleMatch() !== null;
 
   input.addEventListener("input", () => {
     $("#example-tag").hidden = !isExample();
@@ -148,19 +179,47 @@
 
   /* ---------- helpers ---------- */
   async function post(path, body) {
-    const res = await fetch(path, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    let json = {};
-    try {
-      json = await res.json();
-    } catch (e) {
-      /* non-JSON error page */
+    if (state.offline) return sampleResponse(path, body);
+    const payload = JSON.stringify(Object.assign({ fast: true }, body));
+    let lastErr;
+    // One retry on server errors / timeouts; 4xx means a bad request, so no retry.
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const ctl = new AbortController();
+      const timer = setTimeout(() => ctl.abort(), 30000);
+      try {
+        const res = await fetch(path, { method: "POST", headers: { "Content-Type": "application/json" }, body: payload, signal: ctl.signal });
+        let json = {};
+        try {
+          json = await res.json();
+        } catch (e) {
+          /* non-JSON error page (e.g. a 504 from the platform) */
+        }
+        if (res.ok) return json;
+        lastErr = new Error(json.error || `Request failed (${res.status})`);
+        if (res.status < 500) break;
+      } catch (e) {
+        lastErr = e.name === "AbortError" ? new Error(t("timeout")) : e;
+      } finally {
+        clearTimeout(timer);
+      }
     }
-    if (!res.ok) throw new Error(json.error || `Request failed (${res.status})`);
-    return json;
+    throw lastErr;
+  }
+
+  /* Saved demo run: used only when the live pipeline fails (clearly labelled). */
+  async function sampleResponse(path, body) {
+    await sleep(650);
+    const S = window.XRAY_SAMPLE && window.XRAY_SAMPLE[lang];
+    if (!S) throw new Error("Saved demo run unavailable");
+    if (path === "/api/audit") return { audit: S.audit };
+    if (path === "/api/prioritize") return { matrix: S.prioritize.matrix, data_note: S.prioritize.data_note };
+    if (path === "/api/design-agent") return body.xray ? { workflow: S.workflow } : { blueprint: S.blueprint };
+    if (path === "/api/report") return body.xray ? { extras: S.extras } : { brief: S.brief };
+    if (path === "/api/run-ecr") {
+      const map = { intake: { intake: S.ecr.intake }, validate: { validation: S.ecr.validation }, retrieve: { documents: S.ecr.documents }, decide: { decision: S.ecr.decision } };
+      return map[body.stage];
+    }
+    throw new Error("Not available offline");
   }
 
   function el(tag, cls, text) {
@@ -195,6 +254,13 @@
 
   function showError(msg) {
     errorBar.textContent = msg;
+    errorBar.className = "error-bar";
+    errorBar.hidden = false;
+  }
+
+  function showNotice(msg) {
+    errorBar.textContent = msg;
+    errorBar.className = "error-bar notice";
     errorBar.hidden = false;
   }
 
@@ -213,6 +279,7 @@
     });
     $$("#lab tbody tr").forEach((r) => $$("td", r).forEach((td) => { td.textContent = "—"; td.className = ""; }));
     $("#lab-note").textContent = t("labMeasuring");
+    $("#lab-summary").textContent = "";
     $("#lab-prompts").hidden = true;
     $$("#pack-list li").forEach((li) => li.classList.remove("done"));
     $("#btn-open-report").disabled = true;
@@ -239,7 +306,7 @@
   }
 
   /* ---------- pipeline ---------- */
-  async function run() {
+  async function run(opts) {
     const workflow = input.value.trim();
     if (workflow.length < 20) {
       showError(t("err20"));
@@ -252,12 +319,18 @@
     btnRun.textContent = t("running");
     btnRun.classList.remove("idle");
     reset();
+    state.offline = !!(opts && opts.offline);
+    if (state.offline) showNotice(t("offlineNote")(opts.reason || "error"));
 
     const d = state.data;
     d.workflow = workflow;
     let current = "auditor";
     try {
-      runLab(workflow, runId); // real measurements, in parallel with the pipeline
+      if (state.offline) {
+        $("#lab-note").textContent = t("labOffline");
+      } else {
+        runLab(workflow, runId); // real measurements, in parallel with the pipeline
+      }
 
       /* 1 · Auditor */
       setAgent("auditor", "working");
@@ -291,15 +364,19 @@
         d.audit.opportunities.find((o) => o.recommended_intervention !== "keep_human") ||
         d.audit.opportunities[0];
       d.top = Object.assign({}, top, d.matrix[0] ? { priority: d.matrix[0].recommended_priority } : {});
-      const g = await post("/api/design-agent", {
-        opportunity: d.top,
-        xray: true,
-        workflow_steps: steps,
-        human_decision_points: d.audit.human_decision_points,
-        language: lang,
-      });
+      // Two short calls in parallel (blueprint + workflow redesign) keep each one inside Netlify's timeout.
+      const [g, w] = await Promise.all([
+        post("/api/design-agent", { opportunity: d.top, language: lang }),
+        post("/api/design-agent", {
+          opportunity: d.top,
+          xray: true,
+          workflow_steps: steps,
+          human_decision_points: d.audit.human_decision_points,
+          language: lang,
+        }),
+      ]);
       if (!alive()) return;
-      d.blueprint = g.blueprint;
+      d.blueprint = Object.assign({}, g.blueprint, w.workflow);
       const proposed = Array.isArray(d.blueprint.proposed_workflow) ? d.blueprint.proposed_workflow : [];
       const verdict = t("verdicts")[d.blueprint.implementation_verdict] || String(d.blueprint.implementation_verdict || "").replace(/_/g, " ");
       setAgent("designer", "done", `${t("verdict")}: ${verdict} · ${proposed.length} ${t("nodes")}`);
@@ -312,22 +389,24 @@
       /* 4 · Reporter */
       current = "reporter";
       setAgent("reporter", "working");
-      const r = await post("/api/report", {
-        process: workflow,
-        audit: d.audit,
-        opportunity: d.top,
-        blueprint: d.blueprint,
-        xray: true,
-        language: lang,
-      });
+      const reportBody = { process: workflow, audit: d.audit, opportunity: d.top, blueprint: d.blueprint, language: lang };
+      const [r, x] = await Promise.all([
+        post("/api/report", reportBody),
+        post("/api/report", Object.assign({ xray: true }, reportBody)),
+      ]);
       if (!alive()) return;
-      d.brief = r.brief;
+      d.brief = Object.assign({}, r.brief, x.extras);
       setAgent("reporter", "done", t("planReady"));
       ["roadmap", "testing", "training"].forEach(markPack);
       $("#btn-open-report").disabled = false;
     } catch (err) {
       if (!alive()) return;
       setAgent(current, "failed", "");
+      if (!state.offline && window.XRAY_SAMPLE) {
+        // Never leave the visitor on a broken page: replay the saved demo run, clearly labelled.
+        await run({ offline: true, reason: err.message === t("timeout") ? t("whyTimeout") : t("whyError") });
+        return;
+      }
       showError(err.message + " — " + t("retry"));
     } finally {
       if (alive()) {
@@ -486,7 +565,7 @@
   async function runLab(workflow, runId) {
     const alive = () => runId === state.runId;
     try {
-      const improved = await post("/api/improve-prompt", { prompt: t("baseline"), language: lang });
+      const improved = await post("/api/improve-prompt", { prompt: t("baseline"), language: lang, goal: "concise" });
       if (!alive()) return;
       const optimizedPrompt = improved.result.improved_prompt;
       $("#lp-original").textContent = t("baseline");
@@ -516,7 +595,9 @@
       const pr = o.pricing;
       const capped = runs.some((r) => r.truncated) ? t("capped")(o.max_tokens) : "";
       const costNote = (pr.source === "env" ? t("costEnv") : t("costAssumed"))(pr.input_per_mtok, pr.output_per_mtok);
-      const baseNote = t("tokMeasured") + costNote + capped;
+      const pct = (a, b) => (a > 0 ? `${b >= a ? "+" : "−"}${Math.abs(Math.round(((b - a) / a) * 100))}%` : "n/a");
+      $("#lab-summary").textContent = t("labDelta")(pct(totals[0], totals[1]), pct(o.cost_usd, p.cost_usd));
+      const baseNote = t("tokMeasured").replace(/\.$/, ` (${o.meta.model}).`) + costNote + capped;
       $("#lab-note").textContent = baseNote + t("evaluating");
 
       const judged = await post("/api/prompt-lab", {
@@ -526,6 +607,12 @@
         outputs: { original: o.output, optimized: p.output },
       });
       if (!alive()) return;
+      if (judged.unavailable) {
+        labCell("eval", 0, "n/a");
+        labCell("eval", 1, "n/a");
+        $("#lab-note").textContent = baseNote + t("evalUnavailable");
+        return;
+      }
       labCell("eval", 0, `${judged.original.total}/15`, t("judged"));
       labCell("eval", 1, `${judged.optimized.total}/15`, t("judged"));
       mark("eval", [-judged.original.total, -judged.optimized.total]);
@@ -691,7 +778,7 @@
   }
 
   const STATIC = [
-    [".brand-by", "brandBy"], [".hero-sub", "sub"], [".input-head label", "workflow"], [".input-note", "note"],
+    [".brand-by", "brandBy"], ["#contact-link", "contact"], ["#code-link", "code"], [".hero-sub", "sub"], [".input-head label", "workflow"], [".input-note", "note"],
     [".howto li:nth-child(1) span", "how1"], [".howto li:nth-child(2) span", "how2"], [".howto li:nth-child(3) span", "how3"],
     [".lg-manual", "lg_manual"], [".lg-rules", "lg_rules"], [".lg-ai", "lg_ai"], [".lg-human", "lg_human"],
     ["#xray .lane:not(.lane-proposed) .lane-title", "current"], [".lane-proposed .lane-title", "proposed"],
@@ -706,7 +793,7 @@
     document.documentElement.lang = lang;
     STATIC.forEach(([sel, key]) => { const n = $(sel); if (n) n.textContent = t(key); });
     $(".hero h1").innerHTML = t("h1"); // static, developer-controlled markup
-    const tech = $(".tech-link");
+    const tech = $("#tech-link");
     tech.textContent = t("tech") + " ";
     tech.appendChild(el("span", null, "→"));
     $$(".demo-tag").forEach((n) => (n.textContent = t("demo")));
@@ -716,6 +803,8 @@
       $(".agent-role", card).textContent = t("r_" + a);
     });
     ["intake", "validate", "retrieve", "decide", "gate", "report"].forEach((k) => ($(`#live-steps [data-step="${k}"] .s-name`).textContent = t("s_" + k)));
+    $$(".agent").forEach((c) => { if (!c.classList.contains("working") && !c.classList.contains("done") && !c.classList.contains("failed")) $("[data-status]", c).textContent = t("idle"); });
+    $$("#live-steps li").forEach((li) => { if (!/working|done|failed|gate-open/.test(li.className)) $(".s-state", li).textContent = t("waiting"); });
     $$("#pack-list li").forEach((li) => {
       li.lastChild.textContent = t("p_" + li.dataset.pack);
     });
@@ -723,11 +812,12 @@
     $("#lang-en").classList.toggle("active", lang === "en");
     $("#lang-es").classList.toggle("active", lang === "es");
     btnRun.textContent = btnRun.disabled ? t("running") : t("run");
+    renderExamples();
   }
 
   function setLang(next) {
     if (next === lang) return;
-    const wasExample = isExample();
+    const wasExampleId = exampleMatch();
     lang = next;
     try { localStorage.setItem("xray-lang", lang); } catch (e) { /* ignore */ }
     state.runId++; // cancel any run in flight; results are language-specific
@@ -737,12 +827,31 @@
     btnRun.disabled = false;
     reset();
     setFlowEmpty(t("emptyCur"));
-    if (wasExample || !input.value.trim()) input.value = t("example");
+    if (wasExampleId || !input.value.trim()) input.value = (t("ex").find((e) => e.id === (wasExampleId || "ecr")) || t("ex")[0]).text;
     $("#example-tag").hidden = !isExample();
     $("#lab-note").textContent = t("labIdle");
     applyLang();
     btnRun.classList.add("idle");
   }
+
+  function renderExamples() {
+    const box = $("#examples");
+    box.innerHTML = "";
+    box.appendChild(el("span", "ex-label", t("exLabel")));
+    const active = exampleMatch();
+    t("ex").forEach((e) => {
+      const b = el("button", "ex-chip" + (active === e.id ? " active" : ""), e.label);
+      b.type = "button";
+      b.addEventListener("click", () => {
+        if (btnRun.disabled) return;
+        input.value = e.text;
+        $("#example-tag").hidden = false;
+        renderExamples();
+      });
+      box.appendChild(b);
+    });
+  }
+  input.addEventListener("input", renderExamples);
 
   $("#lang-en").addEventListener("click", () => setLang("en"));
   $("#lang-es").addEventListener("click", () => setLang("es"));
@@ -751,5 +860,5 @@
   applyLang();
   btnRun.classList.add("idle");
 
-  btnRun.addEventListener("click", run);
+  btnRun.addEventListener("click", () => run());
 })();

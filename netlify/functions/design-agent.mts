@@ -17,9 +17,12 @@ interface ProposedNode {
   replaces: number[];
 }
 
+interface WorkflowRedesign {
+  proposed_workflow: ProposedNode[];
+  cycle_time_reduction_estimate: { low_pct: number; high_pct: number; basis: string };
+}
+
 interface Blueprint {
-  proposed_workflow?: ProposedNode[];
-  cycle_time_reduction_estimate?: { low_pct: number; high_pct: number; basis: string };
   implementation_verdict:
     | "no_automation"
     | "prompt"
@@ -54,10 +57,16 @@ export default async (req: Request) => {
   }
 
   try {
-    const { opportunity, language, xray, workflow_steps, human_decision_points } = (await req.json()) as {
+    const { opportunity, language, xray, fast, workflow_steps, human_decision_points } = (await req.json()) as {
       opportunity?: unknown;
-      /** AI Workflow X-Ray mode: also redesign the whole workflow as nodes. */
+      /**
+       * AI Workflow X-Ray mode: return ONLY the workflow redesign (nodes +
+       * cycle-time estimate). The X-Ray calls this and the regular blueprint
+       * in parallel so each response stays short enough for Netlify's timeout.
+       */
       xray?: boolean;
+      /** Use the faster model (X-Ray). */
+      fast?: boolean;
       workflow_steps?: unknown;
       human_decision_points?: unknown;
       language?: Language;
@@ -66,7 +75,45 @@ export default async (req: Request) => {
       return jsonResponse({ error: "An opportunity is required." }, 400);
     }
 
+    if (xray) {
+      const { data: workflow, meta } = await callAgentJSONMeta<WorkflowRedesign>({
+        fast,
+        system: `You are an AI Implementation Specialist redesigning an engineering
+workflow so a person can see where AI enters it. Keep a human approval gate
+before anything irreversible. Never claim a measured result: the cycle-time
+figure is a reasoned estimate from the description only.${languageInstruction(language)}`,
+        user: `Prioritized opportunity (JSON):
+${JSON.stringify(opportunity)}
+
+Current workflow steps, numbered from 0 in order (JSON):
+${JSON.stringify(workflow_steps ?? [])}
+
+Human decision points identified by the Auditor (JSON):
+${JSON.stringify(human_decision_points ?? [])}
+
+Return a single JSON object with this exact shape:
+{
+  "proposed_workflow": [
+    {
+      "label": string (1-3 words, node name, e.g. "AI Intake", "Validation", "Knowledge Retrieval", "Human Approval", "Reporting Agent"),
+      "kind": "ai"|"rules"|"human" ("ai" = model does the work, "rules" = deterministic automation, "human" = a person decides),
+      "detail": string (<=10 words),
+      "replaces": number[] (indexes of the current steps this node replaces or absorbs)
+    }
+  ] (4-7 items in flow order; MUST include exactly one node with kind "human" as the approval gate; every current step that is not a human decision should be covered by some node's "replaces"),
+  "cycle_time_reduction_estimate": {
+    "low_pct": number (integer 0-90),
+    "high_pct": number (integer 0-90, >= low_pct),
+    "basis": string (<=15 words: what the estimate rests on; an estimate, NOT a measurement)
+  }
+}`,
+        maxTokens: 700,
+      });
+      return jsonResponse({ workflow, meta });
+    }
+
     const { data: blueprint, meta } = await callAgentJSONMeta<Blueprint>({
+      fast,
       system: `You are an AI Implementation Specialist designing the concrete
 solution for a single prioritized opportunity, for a Project Leader with no
 prior LLM experience to review and approve. Your first job is honesty about
@@ -91,13 +138,7 @@ never propose removing human oversight entirely, even at the "ai_agent"
 level.${languageInstruction(language)}`,
       user: `Prioritized opportunity to solve (JSON):
 ${JSON.stringify(opportunity)}
-${xray ? `
-Current workflow steps, numbered from 0 in order (JSON):
-${JSON.stringify(workflow_steps ?? [])}
 
-Human decision points identified by the Auditor (JSON):
-${JSON.stringify(human_decision_points ?? [])}
-` : ""}
 Return a single JSON object with this exact shape:
 {
   "implementation_verdict": "no_automation"|"prompt"|"deterministic_automation"|"rag_assistant"|"ai_agent",
@@ -111,22 +152,9 @@ Return a single JSON object with this exact shape:
   "integration_point": string (<=20 words: where in the existing workflow/tooling this plugs in, e.g. Jira, Confluence, Teams),
   "success_metrics": string[] (2-3 items, qualitative or structural, not invented numbers),
   "risks": string[] (2-3 items, each as "risk: mitigation"),
-  "implementation_steps": string[] (3-5 concrete, sequential steps; if "no_automation", these are the process improvements that don't involve AI)${xray ? `,
-  "proposed_workflow": [
-    {
-      "label": string (1-3 words, node name, e.g. "AI Intake", "Validation", "Knowledge Retrieval", "Human Approval", "Reporting Agent"),
-      "kind": "ai"|"rules"|"human" ("ai" = model does the work, "rules" = deterministic automation, "human" = a person decides),
-      "detail": string (<=12 words),
-      "replaces": number[] (indexes of the current workflow steps this node replaces or absorbs)
-    }
-  ] (4-7 items in flow order; MUST include exactly one node with kind "human" that acts as an approval gate before anything irreversible; every current step that is not a human decision should be covered by some node's "replaces"),
-  "cycle_time_reduction_estimate": {
-    "low_pct": number (integer 0-90),
-    "high_pct": number (integer 0-90, >= low_pct),
-    "basis": string (<=20 words: what the estimate rests on — it is a reasoned estimate from the description, NOT a measurement)
-  }` : ""}
+  "implementation_steps": string[] (3-5 concrete, sequential steps; if "no_automation", these are the process improvements that don't involve AI)
 }`,
-      maxTokens: xray ? 2600 : 1600,
+      maxTokens: fast ? 1100 : 1600,
     });
 
     return jsonResponse({ blueprint, meta });

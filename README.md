@@ -11,6 +11,12 @@ measured tokens/latency, and a downloadable Implementation Pack.
   `PRICE_OUTPUT_PER_MTOK` env vars, else an assumed $3/$15 per M tokens, labelled as an estimate).
 - `audit`, `design-agent`, `report` accept `xray: true` for extra fields; all agents now also return `meta`
   (real usage/latency). Existing behavior is unchanged when the flag is omitted.
+- Timeouts: the X-Ray sends `fast: true`, which uses a faster model (`XRAY_MODEL` env var, default
+  `claude-haiku-4-5-20251001`) and short responses; the Designer and Reporter are split into two parallel
+  calls (`xray: true` returns only the workflow redesign / roadmap+testing plan). The client retries once on
+  5xx/timeout, and if the live run still fails it replays a clearly labelled saved demo run
+  (`assets/js/xray-sample.js`) instead of breaking.
+- Language defaults to the browser language (ES for Spanish browsers), with an EN/ES toggle.
 - The previous 7-objective assistant lives on at `console.html` ("Explore technical implementation").
 - Local run: `npm install && ANTHROPIC_API_KEY=sk-... npm run dev` → http://localhost:8888
   (or `netlify dev`).

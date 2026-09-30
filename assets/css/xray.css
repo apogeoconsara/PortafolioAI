@@ -300,3 +300,16 @@ h1, h2, h3, p { margin: 0; }
 @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(29, 78, 216, 0.35); } 50% { box-shadow: 0 0 0 7px rgba(29, 78, 216, 0); } }
 .gate { animation: nodein .4s forwards, gatepulse 2s ease-in-out .4s infinite; }
 @keyframes gatepulse { 0%, 100% { border-color: rgba(245, 165, 36, 0.4); } 50% { border-color: rgba(245, 165, 36, 0.9); } }
+
+/* ---------- examples, notice, lab summary, header ---------- */
+.examples { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 6px; }
+.ex-label { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.08em; color: var(--dim); margin-right: 2px; }
+.ex-chip { font: 500 11.5px var(--sans); color: var(--muted); background: var(--panel-2); border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; cursor: pointer; }
+.ex-chip:hover { border-color: var(--blue); color: var(--blue); }
+.ex-chip.active { background: #eef4ff; border-color: var(--blue); color: var(--blue); }
+.running .examples { display: none; }
+.error-bar.notice { color: #92400e; background: #fffbeb; border-color: #fde68a; }
+.lab-summary { font-size: 12px; font-weight: 600; margin-top: 8px; color: var(--text); }
+.lab-summary:empty { display: none; }
+.brand-by { color: var(--muted); font-size: 12.5px; font-weight: 500; }
+.top-right { gap: 16px; }

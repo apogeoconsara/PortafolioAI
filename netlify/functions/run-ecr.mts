@@ -25,7 +25,9 @@ export default async (req: Request) => {
       validation?: unknown;
       documents?: unknown;
       language?: Language;
+      fast?: boolean;
     };
+    const fast = body.fast;
     const lang = languageInstruction(body.language);
 
     switch (body.stage) {
@@ -34,6 +36,7 @@ export default async (req: Request) => {
 
       case "intake": {
         const { data, meta } = await callAgentJSONMeta<Record<string, unknown>>({
+          fast,
           system: `You are the Intake Agent of an engineering change workflow. Extract structured
 fields from an incoming change request email. Use only what the email states;
 use null for anything missing — never guess.${lang}`,
@@ -61,6 +64,7 @@ Return one JSON object:
 
       case "validate": {
         const { data, meta } = await callAgentJSONMeta<{ checks: unknown[]; summary: string }>({
+          fast,
           system: `You are the Validation step of an engineering change workflow. Check the extracted
 request against each rule. Mark "flag" whenever the information is missing or
 unclear. Be strict and brief.${lang}`,
@@ -87,6 +91,7 @@ Return one JSON object:
 
       case "decide": {
         const { data, meta } = await callAgentJSONMeta<Record<string, unknown>>({
+          fast,
           system: `You are the Decision step of an engineering change workflow. You PREPARE a
 recommendation for a human approver; you never approve on your own. Ground
 every statement in the request, the validation result and the retrieved
