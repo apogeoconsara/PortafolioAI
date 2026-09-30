@@ -3,6 +3,33 @@ import Anthropic from "@anthropic-ai/sdk";
 declare const Netlify: { env: { get(key: string): string | undefined } };
 
 const MODEL = "claude-sonnet-5";
+/**
+ * Netlify synchronous functions time out after ~10-26 s. The AI Workflow
+ * X-Ray chains many calls, so it asks for this faster model (`fast: true`)
+ * and keeps each response short. Override with the XRAY_MODEL env var.
+ */
+const FAST_MODEL_DEFAULT = "claude-haiku-4-5-20251001";
+
+/** Calls the API; if the fast model is unavailable for this key, retries once on the default model. */
+async function createMessage(
+  params: Omit<Anthropic.MessageCreateParamsNonStreaming, "model">,
+  fast?: boolean
+): Promise<Anthropic.Message> {
+  const anthropic = getClient();
+  try {
+    return await anthropic.messages.create({ ...params, model: modelFor(fast) });
+  } catch (err) {
+    const status = (err as { status?: number }).status;
+    if (fast && (status === 404 || status === 400 || status === 403)) {
+      return await anthropic.messages.create({ ...params, model: MODEL });
+    }
+    throw err;
+  }
+}
+
+function modelFor(fast?: boolean): string {
+  return fast ? Netlify.env.get("XRAY_MODEL") || FAST_MODEL_DEFAULT : MODEL;
+}
 
 let client: Anthropic | null = null;
 
@@ -67,31 +94,55 @@ export async function callAgentJSONMeta<T>(params: {
   system: string;
   user: string;
   maxTokens?: number;
+  fast?: boolean;
 }): Promise<{ data: T; meta: CallMeta }> {
-  const anthropic = getClient();
   const startedAt = Date.now();
-  const response = await anthropic.messages.create({
-    model: MODEL,
-    max_tokens: params.maxTokens ?? 2000,
-    system:
-      params.system +
-      "\n\nRespond with ONLY valid JSON, no text before or after, no markdown code fences.",
-    messages: [{ role: "user", content: params.user }],
-  });
+  const response = await createMessage(
+    {
+      max_tokens: params.maxTokens ?? 2000,
+      system:
+        params.system +
+        "\n\nRespond with ONLY valid JSON, no text before or after, no markdown code fences.",
+      messages: [{ role: "user", content: params.user }],
+    },
+    params.fast
+  );
   const meta = toMeta(response, startedAt);
 
-  const textBlock = response.content.find((block) => block.type === "text");
-  const raw = textBlock && "text" in textBlock ? textBlock.text : "";
+  const raw = response.content.map((b) => (b.type === "text" ? b.text : "")).join("");
+  const data = parseJSONLoose<T>(raw);
+  if (data === undefined) {
+    const why =
+      response.stop_reason === "max_tokens"
+        ? "The agent's response was cut off before the JSON was complete."
+        : raw.trim() === ""
+          ? "The agent returned an empty response."
+          : "The agent did not return valid JSON.";
+    throw new Error(`${why} Raw response: ${raw.slice(0, 300)}`);
+  }
+  return { data, meta };
+}
+
+/** Parses a JSON object/array even if the model wrapped it in fences or prose. */
+function parseJSONLoose<T>(raw: string): T | undefined {
   const cleaned = raw
     .trim()
     .replace(/^```json\s*/i, "")
     .replace(/^```\s*/i, "")
     .replace(/```\s*$/i, "");
-
   try {
-    return { data: JSON.parse(cleaned) as T, meta };
-  } catch (err) {
-    throw new Error(`The agent did not return valid JSON. Raw response: ${raw.slice(0, 500)}`);
+    return JSON.parse(cleaned) as T;
+  } catch {
+    const start = cleaned.search(/[\[{]/);
+    const end = Math.max(cleaned.lastIndexOf("}"), cleaned.lastIndexOf("]"));
+    if (start >= 0 && end > start) {
+      try {
+        return JSON.parse(cleaned.slice(start, end + 1)) as T;
+      } catch {
+        /* fall through */
+      }
+    }
+    return undefined;
   }
 }
 
@@ -99,6 +150,7 @@ export async function callAgentJSON<T>(params: {
   system: string;
   user: string;
   maxTokens?: number;
+  fast?: boolean;
 }): Promise<T> {
   return (await callAgentJSONMeta<T>(params)).data;
 }
@@ -108,15 +160,17 @@ export async function callAgentTextMeta(params: {
   system?: string;
   user: string;
   maxTokens?: number;
+  fast?: boolean;
 }): Promise<{ text: string; meta: CallMeta }> {
-  const anthropic = getClient();
   const startedAt = Date.now();
-  const response = await anthropic.messages.create({
-    model: MODEL,
-    max_tokens: params.maxTokens ?? 2000,
-    ...(params.system ? { system: params.system } : {}),
-    messages: [{ role: "user", content: params.user }],
-  });
+  const response = await createMessage(
+    {
+      max_tokens: params.maxTokens ?? 2000,
+      ...(params.system ? { system: params.system } : {}),
+      messages: [{ role: "user", content: params.user }],
+    },
+    params.fast
+  );
   const textBlock = response.content.find((block) => block.type === "text");
   return {
     text: textBlock && "text" in textBlock ? textBlock.text : "",

@@ -16,13 +16,15 @@
   <div class="brand">
     <span class="brand-mark" aria-hidden="true"></span>
     <span class="brand-name">AI WORKFLOW X-RAY</span>
-    <span class="brand-by">Sarahí Cruz Salazar · AI Implementation</span>
+    <span class="brand-by">Sarahí Cruz Salazar — AI Implementation Specialist candidate · ALTEN México</span>
   </div>
   <div class="top-right">
     <div class="lang" role="group" aria-label="Language">
       <button type="button" id="lang-en" class="active">EN</button><button type="button" id="lang-es">ES</button>
     </div>
-    <a class="tech-link" href="console.html">Explore technical implementation <span aria-hidden="true">→</span></a>
+    <a class="tech-link" id="contact-link" href="mailto:sarahicruzsalazar@gmail.com">Contact</a>
+    <a class="tech-link" id="code-link" href="https://github.com/apogeoconsara/PortafolioAI" target="_blank" rel="noopener">Code</a>
+    <a class="tech-link" id="tech-link" href="console.html">Explore technical implementation <span aria-hidden="true">→</span></a>
   </div>
 </header>
 
@@ -44,6 +46,7 @@
         <label for="workflow-input">Workflow</label>
         <span class="demo-tag" id="example-tag">Demo scenario</span>
       </div>
+      <div class="examples" id="examples"></div>
       <textarea id="workflow-input" rows="3" spellcheck="false"></textarea>
       <div class="input-foot">
         <span class="input-note">Runs the live Claude pipeline on your text</span>
@@ -140,6 +143,7 @@
           <tr data-row="eval"><th>Evaluation</th><td>—</td><td>—</td></tr>
         </tbody>
       </table>
+      <p class="lab-summary" id="lab-summary"></p>
       <p class="lab-note" id="lab-note">Tokens and latency are measured from the Claude API. Cost is estimated from token counts.</p>
       <details class="lab-prompts" id="lab-prompts" hidden>
         <summary>View prompts</summary>
@@ -187,6 +191,7 @@
   </div>
 </aside>
 
+<script src="assets/js/xray-sample.js"></script>
 <script src="assets/js/xray.js"></script>
 </body>
 </html>

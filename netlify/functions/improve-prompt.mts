@@ -22,12 +22,20 @@ export default async (req: Request) => {
   }
 
   try {
-    const { prompt, language } = (await req.json()) as { prompt?: string; language?: Language };
+    const { prompt, language, goal, fast } = (await req.json()) as {
+      prompt?: string;
+      language?: Language;
+      /** "concise": optimize for token efficiency (used by the Optimization Lab). */
+      goal?: "concise";
+      /** Use the faster model (X-Ray). */
+      fast?: boolean;
+    };
     if (!prompt || prompt.trim().length < 10) {
       return jsonResponse({ error: "Paste a prompt with at least 10 characters." }, 400);
     }
 
     const { data: result, meta } = await callAgentJSONMeta<PromptImprovement>({
+      fast,
       system: `You are a prompt engineering specialist. Given a prompt someone
 already uses, rewrite it to be more reliable and predictable, applying
 concrete techniques: an explicit role, a defined output format, length or
@@ -35,7 +43,16 @@ structure constraints, and separating instructions from data with clear
 delimiters when relevant. Do not change what the prompt is trying to
 accomplish — only how well it is specified. If the original prompt is
 already well-structured, say so honestly rather than inventing changes for
-their own sake.${languageInstruction(language)}`,
+their own sake.${
+        goal === "concise"
+          ? `
+
+Optimization goal: TOKEN EFFICIENCY. The rewritten prompt itself must stay
+under 70 words, and it must tell the model to answer with at most 5 bullets of
+at most 20 words each, with no preamble or closing remarks. Keep any
+placeholder or instruction to use the provided input.`
+          : ""
+      }${languageInstruction(language)}`,
       user: `Original prompt:
 """
 ${prompt}
@@ -48,7 +65,7 @@ Return a single JSON object with this exact shape:
   "rationale": string (<=50 words: why these changes make the output more reliable),
   "estimated_impact": string (<=30 words: qualitative — e.g. shorter/more consistent output, fewer follow-up clarifications — never invent a numeric percentage)
 }`,
-      maxTokens: 1200,
+      maxTokens: fast ? 700 : 1200,
     });
 
     return jsonResponse({ result, meta });

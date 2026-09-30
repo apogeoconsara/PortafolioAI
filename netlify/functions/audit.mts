@@ -47,11 +47,13 @@ export default async (req: Request) => {
   }
 
   try {
-    const { process: workflow, focus, language, xray } = (await req.json()) as {
+    const { process: workflow, focus, language, xray, fast } = (await req.json()) as {
       process?: string;
       focus?: string;
       /** AI Workflow X-Ray mode: also return the step-by-step classification. */
       xray?: boolean;
+      /** Use the faster model (X-Ray). */
+      fast?: boolean;
       language?: Language;
     };
     if (!workflow || workflow.trim().length < 20) {
@@ -62,6 +64,7 @@ export default async (req: Request) => {
     }
 
     const { data: audit, meta } = await callAgentJSONMeta<AuditResult>({
+      fast,
       system: `You are a senior AI Implementation Specialist auditing a real
 engineering workflow. Your job is to understand how the process actually
 works TODAY before recommending anything. Never assume AI is the answer.
@@ -102,7 +105,7 @@ ${xray ? `  "workflow_steps": [
 Be honest: if something should stay human-led, use "keep_human" for it.
 Do not recommend an AI agent for everything — most real opportunities are a
 prompt, a simple automation, or a knowledge assistant.`,
-      maxTokens: xray ? 2000 : 1400,
+      maxTokens: xray ? 1700 : 1400,
     });
 
     return jsonResponse({ audit, meta });

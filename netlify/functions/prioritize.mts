@@ -25,15 +25,18 @@ export default async (req: Request) => {
   }
 
   try {
-    const { opportunities, language } = (await req.json()) as {
+    const { opportunities, language, fast } = (await req.json()) as {
       opportunities?: unknown;
       language?: Language;
+      /** Use the faster model (X-Ray). */
+      fast?: boolean;
     };
     if (!Array.isArray(opportunities) || opportunities.length === 0) {
       return jsonResponse({ error: "An array of opportunities is required." }, 400);
     }
 
     const { data: matrix, meta } = await callAgentJSONMeta<MatrixRow[]>({
+      fast,
       system: `You are prioritizing AI implementation opportunities with the
 judgment of a real AI Implementation Specialist, not with hype. You do NOT
 have access to the project's actual metrics, so you must NEVER invent
@@ -60,7 +63,7 @@ this exact shape, ordered with the highest-priority quick wins first:
   "recommended_priority": "quick_win"|"strategic"|"experiment"|"low_priority",
   "note": string (<=20 words, the reasoning, not a number)
 }]`,
-      maxTokens: 1500,
+      maxTokens: fast ? 900 : 1500,
     });
 
     const data_note =

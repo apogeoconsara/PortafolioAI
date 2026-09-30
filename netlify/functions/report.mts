@@ -24,9 +24,15 @@ export default async (req: Request) => {
   }
 
   try {
-    const { process: workflow, audit, opportunity, blueprint, language, xray } = (await req.json()) as {
-      /** AI Workflow X-Ray mode: also return a roadmap and a testing plan. */
+    const { process: workflow, audit, opportunity, blueprint, language, xray, fast } = (await req.json()) as {
+      /**
+       * AI Workflow X-Ray mode: return ONLY the roadmap and testing plan.
+       * The X-Ray calls this in parallel with the regular brief so each
+       * response stays within Netlify's function timeout.
+       */
       xray?: boolean;
+      /** Use the faster model (X-Ray). */
+      fast?: boolean;
       process?: string;
       audit?: unknown;
       opportunity?: unknown;
@@ -40,7 +46,38 @@ export default async (req: Request) => {
       );
     }
 
+    if (xray) {
+      const { data: extras, meta } = await callAgentJSONMeta<{
+        roadmap: { phase: string; focus: string }[];
+        testing_plan: string[];
+      }>({
+        fast,
+        system: `You are an AI Implementation Specialist writing the delivery plan for an
+AI solution, for a Project Leader. Be concrete and concise. Never invent dates,
+durations or numeric ROI.${languageInstruction(language)}`,
+        user: `Workflow:
+"""
+${workflow}
+"""
+
+Solution blueprint (JSON):
+${JSON.stringify(blueprint)}
+
+Human decision points (JSON):
+${JSON.stringify((audit as { human_decision_points?: unknown })?.human_decision_points ?? [])}
+
+Return a single JSON object with this exact shape:
+{
+  "roadmap": [{ "phase": string (e.g. "Phase 1 · Pilot"), "focus": string (<=20 words: what gets built and validated; no dates) }] (3-4 items),
+  "testing_plan": string[] (3-5 items, each <=20 words: how it is validated before rollout, e.g. shadow mode on past cases, human review sampling, failure-mode checks)
+}`,
+        maxTokens: 600,
+      });
+      return jsonResponse({ extras, meta });
+    }
+
     const { data: brief, meta } = await callAgentJSONMeta<Brief>({
+      fast,
       system: `You are an AI Implementation Specialist writing an
 implementation brief for a Project Leader, in the tone of a document that
 will actually be pasted into Confluence or SharePoint. Be concrete and
@@ -69,11 +106,9 @@ Return a single JSON object with this exact shape:
   "technical_approach": string (<=130 words: summarize the blueprint — approach, AI role, human role, integration point),
   "adoption_plan": string (<=130 words: concrete steps to train the team and get this adopted — reference documentation, a pilot, and re-auditing later),
   "metrics": string (<=80 words: how success will be tracked; state plainly that quantified targets require baseline data if none was given),
-  "documentation": string (<=100 words: what sections this should become in Confluence/SharePoint so another engineer could pick it up)${xray ? `,
-  "roadmap": [{ "phase": string (e.g. "Phase 1 · Pilot"), "focus": string (<=25 words: what gets built and validated, no dates or invented durations) }] (3-4 items),
-  "testing_plan": string[] (3-5 items, each <=25 words: how the solution is validated before rollout — e.g. shadow mode on past cases, human review sampling, failure-mode checks)` : ""}
+  "documentation": string (<=100 words: what sections this should become in Confluence/SharePoint so another engineer could pick it up)
 }`,
-      maxTokens: xray ? 2600 : 1800,
+      maxTokens: fast ? 1100 : 1800,
     });
 
     return jsonResponse({ brief, meta });

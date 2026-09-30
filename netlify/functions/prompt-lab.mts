@@ -51,6 +51,7 @@ export default async (req: Request) => {
       workflow?: string;
       outputs?: { original?: string; optimized?: string };
       language?: Language;
+      fast?: boolean;
     };
 
     if (!body.workflow || body.workflow.trim().length < 20) {
@@ -60,6 +61,7 @@ export default async (req: Request) => {
     if (body.action === "run") {
       if (!body.prompt) return jsonResponse({ error: "A prompt is required." }, 400);
       const { text, meta } = await callAgentTextMeta({
+        fast: body.fast,
         user: `${body.prompt}\n\n"""\n${body.workflow}\n"""`,
         maxTokens: RUN_MAX_TOKENS,
       });
@@ -84,17 +86,21 @@ export default async (req: Request) => {
       }
       // Blind grading: shuffle which output is presented as "A".
       const optimizedFirst = Math.random() < 0.5;
-      const [a, b] = optimizedFirst ? [optimized, original] : [original, optimized];
+      const clip = (t: string) => (t.length > 1800 ? t.slice(0, 1800) + " […]" : t);
+      const [a, b] = optimizedFirst ? [clip(optimized), clip(original)] : [clip(original), clip(optimized)];
 
-      const { data, meta } = await callAgentJSONMeta<{
-        a: Scores;
-        b: Scores;
-        verdict: string;
-      }>({
-        system: `You are a strict evaluator of AI responses about engineering workflows. You grade
+      try {
+        const { data, meta } = await callAgentJSONMeta<{
+          a: Scores;
+          b: Scores;
+          verdict: string;
+        }>({
+          fast: body.fast,
+          system: `You are a strict evaluator of AI responses about engineering workflows. You grade
 two anonymous responses to the same task against a fixed rubric. Judge only
-what is written; do not reward length.${languageInstruction(body.language)}`,
-        user: `Task input (workflow description):
+what is written; do not reward length. A response that is cut off is graded
+on what it contains.${languageInstruction(body.language)}`,
+          user: `Task input (workflow description):
 """
 ${body.workflow}
 """
@@ -118,21 +124,25 @@ Return one JSON object:
 {
   "a": { "relevance": number, "actionability": number, "structure": number },
   "b": { "relevance": number, "actionability": number, "structure": number },
-  "verdict": string (<=25 words, neutral, which is more useful and why)
+  "verdict": string (<=20 words, neutral, which is more useful and why)
 }`,
-        maxTokens: 400,
-      });
+          maxTokens: 500,
+        });
 
-      const total = (s: Scores) => s.relevance + s.actionability + s.structure;
-      const scoresOptimized = optimizedFirst ? data.a : data.b;
-      const scoresOriginal = optimizedFirst ? data.b : data.a;
-      return jsonResponse({
-        original: { ...scoresOriginal, total: total(scoresOriginal) },
-        optimized: { ...scoresOptimized, total: total(scoresOptimized) },
-        verdict: data.verdict,
-        meta,
-        method: "LLM-judged (Claude, blind A/B, 1-5 rubric)",
-      });
+        const total = (s: Scores) => s.relevance + s.actionability + s.structure;
+        const scoresOptimized = optimizedFirst ? data.a : data.b;
+        const scoresOriginal = optimizedFirst ? data.b : data.a;
+        return jsonResponse({
+          original: { ...scoresOriginal, total: total(scoresOriginal) },
+          optimized: { ...scoresOptimized, total: total(scoresOptimized) },
+          verdict: data.verdict,
+          meta,
+          method: "LLM-judged (Claude, blind A/B, 1-5 rubric)",
+        });
+      } catch (err) {
+        // Measurements already shown stay valid; only the grade is missing.
+        return jsonResponse({ unavailable: true, reason: err instanceof Error ? err.message : "judge failed" });
+      }
     }
 
     return jsonResponse({ error: "Unknown action." }, 400);
