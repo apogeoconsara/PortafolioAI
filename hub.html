@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Regional AI &amp; Integration Hub · Sarahí Cruz Salazar</title>
+<meta name="description" content="Executive case: a regional control tower that triages client requests with AI, integrates systems through APIs, enforces data governance and routes exceptions to humans — across Mexico, Central America and the Caribbean.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Manrope:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/hub.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark" aria-hidden="true"></span>
+    <span class="brand-name">REGIONAL AI &amp; INTEGRATION HUB</span>
+    <span class="brand-by" data-i18n="by">Sarahí Cruz Salazar — executive case · AI &amp; Automation Manager, MX · Central America · Caribbean</span>
+  </div>
+  <nav class="top-right" aria-label="Sections">
+    <a href="#tower" data-i18n="nav_tower">Control tower</a>
+    <a href="#run" data-i18n="nav_run">Live workflow</a>
+    <a href="#portfolio" data-i18n="nav_portfolio">Portfolio</a>
+    <a href="#roadmap" data-i18n="nav_roadmap">90-day plan</a>
+    <a href="#strategy" data-i18n="nav_strategy">Strategy</a>
+    <a href="index.html" data-i18n="nav_home">← X-Ray</a>
+    <div class="lang" role="group" aria-label="Language">
+      <button type="button" id="lang-en" class="active">EN</button><button type="button" id="lang-es">ES</button>
+    </div>
+  </nav>
+</header>
+
+<main class="wrap">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div>
+      <h1 data-i18n="h1">One control tower for AI and automation<br><span>across five countries, not five pilots.</span></h1>
+      <p class="hero-sub" data-i18n="hero_sub">A client request arrives by email. AI classifies it and extracts the data, APIs reconcile it with the CRM, governance rules decide what can run alone and what needs a person — and everything leaves an audit trail.</p>
+    </div>
+    <p class="disclaimer" data-i18n="disclaimer">Synthetic environment. No Aon data, systems or processes are used or implied; all clients, policies, figures and integrations are fictitious and built to illustrate the design.</p>
+  </section>
+
+  <!-- CONTROL TOWER -->
+  <section class="block" id="tower">
+    <header class="block-head">
+      <h2 data-i18n="tower_h">Operations overview</h2>
+      <span class="tag" data-i18n="simulated">Simulated data</span>
+    </header>
+
+    <div class="kpis" id="kpis"></div>
+
+    <div class="grid-2">
+      <div class="panel">
+        <h3 data-i18n="countries_h">Country view</h3>
+        <table class="tbl" id="country-table">
+          <thead><tr>
+            <th data-i18n="c_country">Country</th><th class="num" data-i18n="c_req">Requests</th><th class="num" data-i18n="c_auto">Auto-triaged</th>
+            <th class="num" data-i18n="c_dq">Data quality</th><th class="num" data-i18n="c_exc">Open exceptions</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+        <p class="note" data-i18n="countries_note">Click a country to see its policy configuration — the same engine runs everywhere; only the rules change.</p>
+      </div>
+      <div class="panel" id="country-config"></div>
+    </div>
+
+    <div class="panel">
+      <h3 data-i18n="integ_h">Integration health</h3>
+      <div class="integ" id="integ"></div>
+    </div>
+  </section>
+
+  <!-- LIVE WORKFLOW -->
+  <section class="block" id="run">
+    <header class="block-head">
+      <h2 data-i18n="run_h">End-to-end workflow</h2>
+      <span class="tag" data-i18n="synthetic">Synthetic requests</span>
+    </header>
+    <p class="block-sub" data-i18n="run_sub">Pick a request. The pipeline runs step by step; each step is logged. Three cases show three different outcomes of the same process.</p>
+
+    <div class="run-grid">
+      <div class="panel run-input">
+        <div class="scenarios" id="scenarios" role="tablist"></div>
+        <pre class="email" id="email"></pre>
+        <div class="run-controls">
+          <label class="switch" title="">
+            <input type="checkbox" id="live-toggle">
+            <span data-i18n="live_toggle">Use live Claude for extraction</span>
+          </label>
+          <label class="role">
+            <span data-i18n="role_label">Acting as</span>
+            <select id="role">
+              <option value="analyst">Operations Analyst</option>
+              <option value="manager">Account Manager</option>
+              <option value="compliance">Compliance Officer</option>
+            </select>
+          </label>
+          <button class="run-btn" id="btn-run" type="button" data-i18n="run_btn">RUN WORKFLOW</button>
+        </div>
+        <p class="note" id="live-note" data-i18n="live_note">Default: local rules engine (deterministic, no network). With the toggle on, extraction is done by Claude through a serverless function and falls back to the rules engine if unavailable. Claude only extracts — routing is always rule-based.</p>
+      </div>
+
+      <div class="panel">
+        <ol class="steps" id="steps"></ol>
+        <div class="gate" id="gate" hidden>
+          <p class="gate-title" data-i18n="gate_h">Human review required</p>
+          <p class="gate-body" id="gate-body"></p>
+          <p class="gate-need" id="gate-need"></p>
+          <div class="gate-actions">
+            <button class="btn-approve" id="btn-approve" type="button" data-i18n="approve">APPROVE</button>
+            <button class="btn-reject" id="btn-reject" type="button" data-i18n="reject">RETURN / ESCALATE</button>
+          </div>
+        </div>
+        <div class="outcome" id="outcome" hidden></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <header class="panel-head">
+        <h3 data-i18n="audit_h">Audit trail</h3>
+        <button class="ghost" id="btn-download" type="button" disabled data-i18n="download">Download JSON</button>
+      </header>
+      <ol class="audit" id="audit"><li class="audit-empty" data-i18n="audit_empty">Run a request to generate its audit trail.</li></ol>
+    </div>
+  </section>
+
+  <!-- PORTFOLIO -->
+  <section class="block" id="portfolio">
+    <header class="block-head">
+      <h2 data-i18n="pf_h">Automation portfolio — prioritised by ROI and risk</h2>
+      <span class="tag" data-i18n="illustrative">Illustrative scoring</span>
+    </header>
+    <p class="block-sub" data-i18n="pf_sub">Score = 3 × value − effort − 1.5 × risk (1–5 scales). Wave 1 funds what is valuable, cheap and safe first; high-risk items wait for governance to mature.</p>
+    <div class="panel"><table class="tbl" id="pf-table">
+      <thead><tr>
+        <th data-i18n="pf_init">Initiative</th><th class="num" data-i18n="pf_value">Value</th><th class="num" data-i18n="pf_effort">Effort</th>
+        <th class="num" data-i18n="pf_risk">Risk</th><th data-i18n="pf_score">Score</th><th data-i18n="pf_wave">Wave</th>
+      </tr></thead><tbody></tbody></table></div>
+  </section>
+
+  <!-- ROADMAP -->
+  <section class="block" id="roadmap">
+    <header class="block-head"><h2 data-i18n="rm_h">90-day implementation roadmap</h2></header>
+    <div class="phases" id="phases"></div>
+  </section>
+
+  <!-- STRATEGY -->
+  <section class="block" id="strategy">
+    <header class="block-head"><h2 data-i18n="st_h">“How would you define an AI and automation strategy for Mexico, Central America and the Caribbean?”</h2></header>
+    <div class="grid-2">
+      <ol class="strategy" id="strategy-list"></ol>
+      <div class="panel">
+        <h3 data-i18n="cov_h">Coverage of the role</h3>
+        <table class="tbl" id="cov-table"><tbody></tbody></table>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="foot">
+  <span data-i18n="foot">Built with Netlify Functions + Claude (Anthropic). All data is synthetic.</span>
+  <a href="mailto:sarahicruzsalazar@gmail.com">sarahicruzsalazar@gmail.com</a>
+  <a href="https://github.com/apogeoconsara/PortafolioAI" target="_blank" rel="noopener">Code</a>
+</footer>
+
+<script src="assets/js/hub-i18n.js"></script>
+<script src="assets/js/hub.js"></script>
+</body>
+</html>

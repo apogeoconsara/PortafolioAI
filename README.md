@@ -1,3 +1,19 @@
+# Regional AI & Integration Hub (`hub.html`)
+
+Executive case for an AI & Automation **Manager** role (MX · Central America · Caribbean): a control tower plus
+an end-to-end workflow, built on the same Netlify + Claude stack. All data is synthetic; no employer data or
+systems are used or implied.
+
+- Operations overview (simulated KPIs, per-country view/config, integration health).
+- Workflow with 3 requests (clean / incomplete docs / CRM conflict): intake → extraction → completeness →
+  mock CRM API reconciliation → governance checks → rule-based routing → human gate (role-based) → action,
+  with a downloadable audit trail. Extraction runs on a local rules engine by default; the toggle uses
+  `netlify/functions/hub-extract.mts` (Claude) and falls back to the rules engine. Claude never decides routing.
+- ROI/risk portfolio prioritisation, 90-day roadmap with exit gates, strategy answer and role-coverage map.
+- Files: `hub.html`, `assets/css/hub.css`, `assets/js/hub.js`, `assets/js/hub-i18n.js` (EN/ES copy + data).
+
+---
+
 # AI Workflow X-Ray — Sarahí Cruz Salazar
 
 **Homepage (`index.html`)** is now a single interactive experience: paste a workflow and the existing Claude
