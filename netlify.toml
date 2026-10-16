@@ -4,3 +4,10 @@
 
 [functions]
   node_bundler = "esbuild"
+
+# This site's home page is the Regional AI & Integration Hub.
+[[redirects]]
+  from = "/"
+  to = "/hub.html"
+  status = 200
+  force = true
